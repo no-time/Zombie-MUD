@@ -1,0 +1,17 @@
+{
+  "1": { "Name": "Awakening Cell", "Description": "A cold, damp stone cell. The heavy iron door to the north has been blasted open.", "Exits": { "North": "2" } },
+  "2": { "Name": "Ruined Hallway", "Description": "Flickering torches illuminate a long, blood-stained hallway. A slightly crooked painting hangs on the west wall.", "Exits": { "South": "1", "East": "3" }, "Interactables": { "painting": { "State": "closed", "TargetRoom": "99" } } },
+  "99": { "Name": "Hidden Safe Room", "Description": "You squeezed through the hole behind the painting. A shady figure sits in the corner.", "Exits": { "Out": "2" }, "NPC": "Wandering Merchant" },
+  "3": { "Name": "Guard Checkpoint", "Description": "A ransacked guard post. To the south, a massive portcullis blocks the way.", "Exits": { "West": "2", "South": "4" }, "Locked": { "South": "Strange Key" } },
+  "4": { "Name": "Heavy Iron Gate", "Description": "You are standing past the portcullis. The path splits here. To the east, you hear the distant hum of a city. To the west, the corridor grows eerily quiet.", "Exits": { "North": "3", "East": "5", "West": "98" } },
+  "5": { "Name": "Large Vestibule", "Description": "Grand marble pillars line this vast antechamber. Fresh air drifts in from the east.", "Exits": { "West": "4", "East": "6" } },
+  "6": { "Name": "Starter City Outskirts", "Description": "You have reached the edge of civilization. The sounds of merchants and travelers fill the air. A dark, fortified path leads north, and a rickety wooden staircase leads up to a watchtower.", "Exits": { "West": "5", "North": "7", "Up": "6u" } },
+  "6u": { "Name": "The Old Watchtower", "Description": "The wind howls through the wooden slats of this old tower. Mats and training dummies are scattered across the floor.", "Exits": { "Down": "6" }, "NPC": "Old Master" },
+  "7": { "Name": "Surveillance Hub", "Description": "Banks of shattered monitors line the walls. A few screens still flicker with static, casting a pale light over the debris.", "Exits": { "South": "6", "East": "8", "North": "9" }, "MinLevel": 10 },
+  "8": { "Name": "Corrupted Server Room", "Description": "Massive data racks hum aggressively. Tangled wires pool on the floor like black veins. It smells of ozone and burnt copper.", "Exits": { "West": "7" }, "MinLevel": 15 },
+  "9": { "Name": "The Apex Enclosure (DANGER ZONE)", "Description": "The air here is heavy and toxic. Deep gouges in the reinforced steel walls suggest whatever was kept here broke out a long time ago.", "Exits": { "South": "7" }, "MinLevel": 20 },
+  "98": { "Name": "Simulated Death Trap", "Description": "The walls are covered in scorch marks and old blood. It looks like a dead end, but you notice a heavy iron grate set into the floor.", "Exits": { "East": "4" }, "Interactables": { "grate": { "State": "closed", "TargetRoom": "97" } } },
+  "97": { "Name": "Under the Bloody Grate", "Description": "You dropped down into a pitch-black tunnel. The air is freezing. A singular path leads further down into the abyss.", "Exits": { "Up": "98", "Down": "96" } },
+  "96": { "Name": "The Dark Room", "Description": "Complete, suffocating darkness. You feel an ancient, hungry presence waiting for you to speak your devotion. The pit continues downward.", "Exits": { "Up": "97", "Down": "95" } },
+  "95": { "Name": "Pit of Hell", "Description": "A true death trap. The floor gives way beneath you to an endless lake of fire.", "Exits": { "Up": "96" } }
+}
