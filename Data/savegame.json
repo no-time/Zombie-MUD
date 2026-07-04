@@ -1,0 +1,376 @@
+{
+    "Player":  {
+                   "Name":  "Carl",
+                   "Class":  "Vampire",
+                   "Level":  20,
+                   "XP":  157360,
+                   "NextLevelXP":  221890,
+                   "MaxHP":  485,
+                   "HP":  437,
+                   "MaxSP":  44,
+                   "SP":  14,
+                   "MaxBP":  108,
+                   "BP":  107,
+                   "MaxAmmo":  0,
+                   "Ammo":  0,
+                   "BaseStrength":  51,
+                   "Strength":  56,
+                   "BaseDexterity":  51,
+                   "Dexterity":  51,
+                   "BaseCON":  32,
+                   "CON":  37,
+                   "BaseCHA":  34,
+                   "CHA":  34,
+                   "BaseTactics":  29,
+                   "Tactics":  29,
+                   "BaseInt":  32,
+                   "Int":  32,
+                   "BaseLuck":  26,
+                   "Luck":  26,
+                   "BaseInfectivity":  24,
+                   "Infectivity":  24,
+                   "BaseArmor":  2,
+                   "Armor":  36,
+                   "Damage":  40,
+                   "EquippedWeapon":  "Chainsaw",
+                   "Inventory":  [
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Energy Drink",
+                                     "Energy Drink",
+                                     "Energy Drink",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Energy Drink",
+                                     "Energy Drink",
+                                     "Energy Drink",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Energy Drink",
+                                     "Energy Drink",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Energy Drink",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Bandage",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Radioactive Pendant",
+                                     "Pistol Ammo",
+                                     "Pistol Ammo",
+                                     "Energy Drink",
+                                     "Pistol Ammo",
+                                     "Pistol Ammo",
+                                     "Pistol Ammo",
+                                     "Energy Drink",
+                                     "Pistol Ammo",
+                                     "Sledgehammer",
+                                     "Energy Drink",
+                                     "Bandage",
+                                     "Leather Jacket",
+                                     "Fire Axe",
+                                     "Bandage",
+                                     "Fire Axe",
+                                     "Bandage",
+                                     "Combat Boots",
+                                     "Bloodwerk Choker",
+                                     "Scrap Pauldrons",
+                                     "Radioactive Pendant",
+                                     "Scrap Pauldrons",
+                                     "Radioactive Pendant"
+                                 ],
+                   "Currency":  39732,
+                   "ActiveEffects":  [
+                                         {
+                                             "Name":  "Exhausted",
+                                             "Duration":  9,
+                                             "DoT":  0,
+                                             "Modifiers":  {
+
+                                                           }
+                                         }
+                                     ],
+                   "ActivePet":  {
+                                     "Name":  "Vampiric Zombified Carl",
+                                     "Level":  24,
+                                     "XP":  11350,
+                                     "MaxHP":  525,
+                                     "HP":  250,
+                                     "Damage":  43,
+                                     "Armor":  22,
+                                     "IsLegacyPet":  false
+                                 },
+                   "Bonechips":  0,
+                   "AppliedBonechipTiers":  0,
+                   "Gunpowder":  0,
+                   "AppliedGunpowderTiers":  0,
+                   "EnergyOrbs":  0,
+                   "AppliedOrbTiers":  0,
+                   "ToxicGarnets":  0,
+                   "AppliedGarnetTiers":  0,
+                   "PetBonusHP":  0,
+                   "BaseWeaponDamage":  0,
+                   "EquippedArmor":  "Tactical Plate",
+                   "EquippedShoulders":  "Scrap Pauldrons",
+                   "EquippedBoots":  "None",
+                   "EquippedTrinket":  "Apex Alpha Badge",
+                   "EquippedNecklace":  "Radioactive Pendant",
+                   "LearnedSkills":  [
+                                         "Focus",
+                                         "Bite",
+                                         "Blood Curse",
+                                         "First Aid",
+                                         "Brains!",
+                                         "Blood Mist",
+                                         "Exsanguinate"
+                                     ]
+               },
+    "WorldMap":  {
+                     "3":  {
+                               "Name":  "Guard Checkpoint",
+                               "Description":  "A ransacked guard post. To the south, a massive portcullis blocks the way.",
+                               "Exits":  {
+                                             "West":  "2",
+                                             "South":  "4"
+                                         },
+                               "Locked":  {
+                                              "South":  null
+                                          }
+                           },
+                     "5":  {
+                               "Name":  "Large Vestibule",
+                               "Description":  "Grand marble pillars line this vast antechamber. Fresh air drifts in from the east.",
+                               "Exits":  {
+                                             "West":  "4",
+                                             "East":  "6"
+                                         }
+                           },
+                     "96":  {
+                                "Name":  "The Dark Room",
+                                "Description":  "Complete, suffocating darkness. You feel an ancient, hungry presence waiting for you to speak your devotion. The pit continues downward.",
+                                "Exits":  {
+                                              "Up":  "97",
+                                              "Down":  "95"
+                                          }
+                            },
+                     "95":  {
+                                "Name":  "Pit of Hell",
+                                "Description":  "A true death trap. The floor gives way beneath you to an endless lake of fire.",
+                                "Exits":  {
+                                              "Up":  "96"
+                                          }
+                            },
+                     "6u":  {
+                                "Name":  "The Old Watchtower",
+                                "Description":  "The wind howls through the wooden slats of this old tower. Mats and training dummies are scattered across the floor.",
+                                "Exits":  {
+                                              "Down":  "6"
+                                          },
+                                "NPC":  "Old Master"
+                            },
+                     "2":  {
+                               "Name":  "Ruined Hallway",
+                               "Description":  "Flickering torches illuminate a long, blood-stained hallway. A slightly crooked painting hangs on the west wall.",
+                               "Exits":  {
+                                             "South":  "1",
+                                             "East":  "3"
+                                         },
+                               "Interactables":  {
+                                                     "painting":  {
+                                                                      "State":  "open",
+                                                                      "TargetRoom":  "99"
+                                                                  }
+                                                 }
+                           },
+                     "97":  {
+                                "Name":  "Under the Bloody Grate",
+                                "Description":  "You dropped down into a pitch-black tunnel. The air is freezing. A singular path leads further down into the abyss.",
+                                "Exits":  {
+                                              "Up":  "98",
+                                              "Down":  "96"
+                                          }
+                            },
+                     "8":  {
+                               "Name":  "Corrupted Server Room",
+                               "Description":  "Massive data racks hum aggressively. Tangled wires pool on the floor like black veins. It smells of ozone and burnt copper.",
+                               "Exits":  {
+                                             "West":  "7"
+                                         },
+                               "MinLevel":  15
+                           },
+                     "1":  {
+                               "Name":  "Awakening Cell",
+                               "Description":  "A cold, damp stone cell. The heavy iron door to the north has been blasted open.",
+                               "Exits":  {
+                                             "North":  "2"
+                                         }
+                           },
+                     "9":  {
+                               "Name":  "The Apex Enclosure (DANGER ZONE)",
+                               "Description":  "The air here is heavy and toxic. Deep gouges in the reinforced steel walls suggest whatever was kept here broke out a long time ago.",
+                               "Exits":  {
+                                             "South":  "7"
+                                         },
+                               "MinLevel":  20
+                           },
+                     "98":  {
+                                "Name":  "Simulated Death Trap",
+                                "Description":  "The walls are covered in scorch marks and old blood. It looks like a dead end, but you notice a heavy iron grate set into the floor.",
+                                "Exits":  {
+                                              "East":  "4"
+                                          },
+                                "Interactables":  {
+                                                      "grate":  {
+                                                                    "State":  "open",
+                                                                    "TargetRoom":  "97"
+                                                                }
+                                                  }
+                            },
+                     "7":  {
+                               "Name":  "Surveillance Hub",
+                               "Description":  "Banks of shattered monitors line the walls. A few screens still flicker with static, casting a pale light over the debris.",
+                               "Exits":  {
+                                             "South":  "6",
+                                             "East":  "8",
+                                             "North":  "9"
+                                         },
+                               "MinLevel":  10
+                           },
+                     "99":  {
+                                "Name":  "Hidden Safe Room",
+                                "Description":  "You squeezed through the hole behind the painting. A shady figure sits in the corner.",
+                                "Exits":  {
+                                              "Out":  "2"
+                                          },
+                                "NPC":  "Wandering Merchant"
+                            },
+                     "6":  {
+                               "Name":  "Starter City Outskirts",
+                               "Description":  "You have reached the edge of civilization. The sounds of merchants and travelers fill the air. A dark, fortified path leads north, and a rickety wooden staircase leads up to a watchtower.",
+                               "Exits":  {
+                                             "West":  "5",
+                                             "North":  "7",
+                                             "Up":  "6u"
+                                         }
+                           },
+                     "4":  {
+                               "Name":  "Heavy Iron Gate",
+                               "Description":  "You are standing past the portcullis. The path splits here. To the east, you hear the distant hum of a city. To the west, the corridor grows eerily quiet.",
+                               "Exits":  {
+                                             "North":  "3",
+                                             "East":  "5",
+                                             "West":  "98"
+                                         }
+                           }
+                 },
+    "LegacyBonuses":  {
+                          "Gunpowder":  0,
+                          "ForesightMob":  null,
+                          "HasOuroboros":  true,
+                          "PlayerCorpse":  null,
+                          "UnlockedClasses":  [
+                                                  "Vampire"
+                                              ],
+                          "Bonechips":  0,
+                          "Stash":  [
+
+                                    ],
+                          "MaxLevelReached":  1,
+                          "ToxicGarnets":  0,
+                          "UnlockedTiers":  {
+
+                                            },
+                          "Scrap":  723,
+                          "EnergyOrbs":  0
+                      }
+}

@@ -727,12 +727,14 @@ function Invoke-SkillRound {
         $BonusDmg = $Player.BP
         
         if ($null -eq $Player.ActiveEffects) { $Player.ActiveEffects = @() }
-        $Player.ActiveEffects = @($Player.ActiveEffects) + [PSCustomObject]@{ Name="Blood Mist"; Duration=5; DoT=0; Modifiers=@{Armor=10; Damage=$BonusDmg} }
+        # Replaced 'Damage' with 'Strength' so the combat engine scales it into massive melee damage!
+        $Player.ActiveEffects = @($Player.ActiveEffects) + [PSCustomObject]@{ Name="Blood Mist"; Duration=5; DoT=0; Modifiers=@{Armor=10; Strength=$BonusDmg} }
         $Player.ActiveEffects = @($Player.ActiveEffects) + [PSCustomObject]@{ Name="Exhausted"; Duration=10; DoT=0; Modifiers=@{} }
-        $Message += "🦇 BLOOD MIST! You vaporize your blood into a protective mist! Gained +$BonusDmg DMG and +10 AC for 5 rounds, but you are now Exhausted!"; $IsAttack = $false
+        $Message += "🦇 BLOOD MIST! You vaporize your blood into a protective mist! Gained +$BonusDmg STR and +10 AC for 5 rounds, but you are now Exhausted!"; $IsAttack = $false
     }
     elseif ($SkillName -ieq 'Exsanguinate') {
-        if ($Player.BP -lt 70) { return "You need at least 70 BP to unleash Exsanguinate!" }
+        # Fixed string to match 'Needs' so it doesn't pass a turn on failure
+        if ($Player.BP -lt 70) { return "Needs 70 BP to unleash Exsanguinate!" }
         $SPCost = 15; if ($IsFreeCast) { $SPCost = 0 }; if ($Player.SP -lt $SPCost) { return "Needs $SPCost SP." }; $Player.SP -= $SPCost
         
         $Player.BP = [math]::Min($Player.MaxBP, ($Player.BP + 5))
@@ -908,73 +910,7 @@ function Invoke-SkillRound {
         }
     }
 
-    # --- UNIFIED DEATH CHECK ---
-    if ($Mob.HP -le 0) {
-        $Message += "`n> The $($Mob.Name) has been defeated! Gained $($Mob.XP) XP and found $($Mob.Scrap) scrap."
-        $Player.XP += $Mob.XP; $Player.Currency += $Mob.Scrap
+     # (Closes Pet Engine block)
 
-        # --- BESERKER 10: BLOODTHIRST ---
-        if ($Player.LearnedSkills -contains "Bloodthirst") {
-            $Heal = [math]::Floor($Player.MaxHP * 0.10)
-            $Player.HP = [math]::Min($Player.MaxHP, $Player.HP + $Heal)
-            $Message += "`n> 🩸 BLOODTHIRST! The kill fuels you, recovering $Heal HP!"
-        }
-
-        if ($null -eq $Player.ActivePet) {
-            $HasCurse = @($Mob.ActiveEffects) | Where-Object { $_.Name -eq "Blood Curse" }
-            $HasRot = @($Mob.ActiveEffects) | Where-Object { $_.Name -eq "Zombie Rot" }
-
-            if ($null -ne $HasCurse) {
-                $Player.ActivePet = [PSCustomObject]@{ Name="Vampiric $($Mob.Name)"; Level=$Mob.Level; XP=0; MaxHP=($Mob.MaxHP + $Player.PetBonusHP); HP=($Mob.MaxHP + $Player.PetBonusHP); Damage=$Mob.Damage; Armor=$Mob.Armor; IsLegacyPet = $false }
-                $Message += "`n> The Blood Curse takes hold... The $($Mob.Name) resurrects as your Vampiric servant!"
-            } elseif ($null -ne $HasRot) {
-                if (Invoke-InfectionCheck -Infectivity $Player.Infectivity) {
-                    $Player.ActivePet = [PSCustomObject]@{ Name="Rotting $($Mob.Name)"; Level=$Mob.Level; XP=0; MaxHP=($Mob.MaxHP + $Player.PetBonusHP); HP=($Mob.MaxHP + $Player.PetBonusHP); Damage=$Mob.Damage; Armor=$Mob.Armor; IsLegacyPet = $false }
-                    $Message += "`n> COIN FLIP WON: The Zombie Rot consumes the corpse... The $($Mob.Name) rises as your infected servant!"
-                } else {
-                    $Message += "`n> COIN FLIP FAILED: The $($Mob.Name)'s corpse rots into useless sludge."
-                }
-            }
-        }
-
-        if ($null -ne $Player.ActivePet -and $Player.ActivePet.Level -lt 100) {
-            $Player.ActivePet.XP += $Mob.XP
-            $pLvl = $Player.ActivePet.Level; $NextXP = 10000
-            if ($pLvl -ge 99) { $NextXP = 1000000 } elseif ($pLvl -ge 61) { $NextXP = 250000 } elseif ($pLvl -ge 51) { $NextXP = 100000 }
-            elseif ($pLvl -ge 41) { $NextXP = 50000 } elseif ($pLvl -ge 36) { $NextXP = 25000 } elseif ($pLvl -ge 31) { $NextXP = 17500 }
-            elseif ($pLvl -ge 21) { $NextXP = 15000 } elseif ($pLvl -ge 11) { $NextXP = 12500 }
-
-            if ($Player.ActivePet.XP -ge $NextXP) {
-                $Player.ActivePet.Level += 1; $Player.ActivePet.XP -= $NextXP
-                $Player.ActivePet.MaxHP += 15; $Player.ActivePet.HP = $Player.ActivePet.MaxHP
-                $Player.ActivePet.Damage += 3; $Player.ActivePet.Armor += 1
-                $Message += "`n> YOUR PET LEVELED UP! The $($Player.ActivePet.Name) is now Level $($Player.ActivePet.Level)!"
-            }
-        }
-
-        if ($null -ne $Mob.LootTable -and $Mob.LootTable.Count -gt 0) {
-            foreach ($Item in $Mob.LootTable) { $Player.Inventory += $Item; $Message += "`n> [LOOT] You picked up: $Item" }
-        }
-
-        while ($Player.XP -ge $Player.NextLevelXP) {
-            $Player.Level += 1; $Player.MaxHP += 15; $Player.HP = $Player.MaxHP; $Player.MaxSP += 1; $Player.SP = $Player.MaxSP; 
-            $Player.BaseStrength += 2; $Player.Strength = $Player.BaseStrength
-            $Player.BaseDexterity += 2; $Player.Dexterity = $Player.BaseDexterity
-            
-            $Player.BaseCON += 1; $Player.CON = $Player.BaseCON
-            $Player.BaseCHA += 1; $Player.CHA = $Player.BaseCHA
-            $Player.BaseTactics += 1; $Player.Tactics = $Player.BaseTactics
-            $Player.BaseInt += 1; $Player.Int = $Player.BaseInt
-            $Player.BaseLuck += 1; $Player.Luck = $Player.BaseLuck
-            
-            if ($Player.Class -ne "Immune Human") { $Player.BaseInfectivity += 1; $Player.Infectivity = $Player.BaseInfectivity }
-            $Player.NextLevelXP = [math]::Round($Player.NextLevelXP * 1.5)
-            $Message += "`n> LEVEL UP! You are now Level $($Player.Level)! Stats increased, HP/SP restored."
-            
-            $NewClassSkills = Get-ClassSkills -ClassName $Player.Class -PlayerLevel $Player.Level
-            foreach ($sk in $NewClassSkills) { if ($Player.LearnedSkills -notcontains $sk) { $Player.LearnedSkills += $sk } }
-        }
-    }
-    
     return $Message
 }

@@ -133,7 +133,14 @@ function Invoke-GameTick {
     if ($null -ne $Mob -and $Mob.HP -le 0) {
         $MobDied = $true
         $Player.XP += $Mob.XP; $Player.Currency += $Mob.Scrap
-        $TickMsgs += "The $($Mob.Name) succumbed to its wounds and died! Gained $($Mob.XP) XP."
+        $TickMsgs += "The $($Mob.Name) has been defeated! Gained $($Mob.XP) XP and found $($Mob.Scrap) scrap."
+
+        # --- BESERKER 10: BLOODTHIRST ---
+        if ($Player.LearnedSkills -contains "Bloodthirst") {
+            $Heal = [math]::Floor($Player.MaxHP * 0.10)
+            $Player.HP = [math]::Min($Player.MaxHP, $Player.HP + $Heal)
+            $TickMsgs += "🩸 BLOODTHIRST! The kill fuels you, recovering $Heal HP!"
+        }
 
         if ($null -eq $Player.ActivePet) {
             $HasCurse = @($Mob.ActiveEffects) | Where-Object { $_.Name -eq "Blood Curse" }
