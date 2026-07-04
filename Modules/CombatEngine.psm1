@@ -20,12 +20,12 @@ function Invoke-TacticsProc {
     
     $StatContrib = [math]::Min(30, $BaseChance)
     $BonusChance = 0
-    if ($null -ne $Player.ActiveEffects) { foreach ($Eff in $Player.ActiveEffects) { if ($null -ne $Eff.Modifiers -and $Eff.Modifiers.ContainsKey('TacticsChance')) { $BonusChance += $Eff.Modifiers.TacticsChance } } }
+    if ($null -ne $Player.ActiveEffects) { foreach ($Eff in $Player.ActiveEffects) { if ($null -ne $Eff.Modifiers -and $null -ne $Eff.Modifiers.TacticsChance) { $BonusChance += $Eff.Modifiers.TacticsChance } } }
     $EquipSlots = @($Player.EquippedArmor, $Player.EquippedShoulders, $Player.EquippedBoots, $Player.EquippedTrinket, $Player.EquippedNecklace)
     foreach ($Eq in $EquipSlots) {
         if ($Eq -ne "None" -and $null -ne $Eq) {
             $ItemData = Get-ItemStats -ItemName $Eq
-            if ($null -ne $ItemData -and $null -ne $ItemData.Modifiers -and $ItemData.Modifiers.ContainsKey('TacticsChance')) { $BonusChance += $ItemData.Modifiers.TacticsChance }
+            if ($null -ne $ItemData -and $null -ne $ItemData.Modifiers -and $null -ne $ItemData.Modifiers.TacticsChance) { $BonusChance += $ItemData.Modifiers.TacticsChance }
         }
     }
     

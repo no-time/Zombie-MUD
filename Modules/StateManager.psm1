@@ -19,14 +19,14 @@ function Invoke-GameTick {
         if ($null -ne $Player.ActiveEffects) {
             foreach ($Effect in $Player.ActiveEffects) {
                 if ($Effect.Duration -gt 0) {
-                    if ($Effect.Modifiers.ContainsKey('Strength'))     { $BonusStr   += $Effect.Modifiers.Strength }
-                    if ($Effect.Modifiers.ContainsKey('Dexterity'))    { $BonusDex   += $Effect.Modifiers.Dexterity }
-                    if ($Effect.Modifiers.ContainsKey('Armor'))        { $BonusArmor += $Effect.Modifiers.Armor }
-                    if ($Effect.Modifiers.ContainsKey('Tactics'))      { $BonusTac   += $Effect.Modifiers.Tactics }
-                    if ($Effect.Modifiers.ContainsKey('Luck'))         { $BonusLuck  += $Effect.Modifiers.Luck }
-                    if ($Effect.Modifiers.ContainsKey('Int'))          { $BonusInt   += $Effect.Modifiers.Int }
-                    if ($Effect.Modifiers.ContainsKey('Constitution')) { $BonusCon   += $Effect.Modifiers.Constitution }
-                    if ($Effect.Modifiers.ContainsKey('Charisma'))     { $BonusCha   += $Effect.Modifiers.Charisma }
+                    if ($null -ne $Effect.Modifiers.Strength)     { $BonusStr   += $Effect.Modifiers.Strength }
+                    if ($null -ne $Effect.Modifiers.Dexterity)    { $BonusDex   += $Effect.Modifiers.Dexterity }
+                    if ($null -ne $Effect.Modifiers.Armor)        { $BonusArmor += $Effect.Modifiers.Armor }
+                    if ($null -ne $Effect.Modifiers.Tactics)      { $BonusTac   += $Effect.Modifiers.Tactics }
+                    if ($null -ne $Effect.Modifiers.Luck)         { $BonusLuck  += $Effect.Modifiers.Luck }
+                    if ($null -ne $Effect.Modifiers.Int)          { $BonusInt   += $Effect.Modifiers.Int }
+                    if ($null -ne $Effect.Modifiers.Constitution) { $BonusCon   += $Effect.Modifiers.Constitution }
+                    if ($null -ne $Effect.Modifiers.Charisma)     { $BonusCha   += $Effect.Modifiers.Charisma }
                     
                     if ($TurnPassed) {
                         if ($null -ne $Effect.DoT -and $Effect.DoT -gt 0) {
@@ -104,8 +104,8 @@ function Invoke-GameTick {
         if ($null -ne $Mob.ActiveEffects) {
             foreach ($Effect in $Mob.ActiveEffects) {
                 if ($Effect.Duration -gt 0) {
-                    if ($Effect.Modifiers.ContainsKey('Damage')) { $BonusMobDmg += $Effect.Modifiers.Damage }
-                    if ($Effect.Modifiers.ContainsKey('Armor'))  { $BonusMobArmor += $Effect.Modifiers.Armor }
+                    if ($null -ne $Effect.Modifiers.Damage) { $BonusMobDmg += $Effect.Modifiers.Damage }
+                    if ($null -ne $Effect.Modifiers.Armor)  { $BonusMobArmor += $Effect.Modifiers.Armor }
                     
                     if ($null -ne $Effect.DoT -and $Effect.DoT -gt 0) {
                         $Mob.HP -= $Effect.DoT
