@@ -668,13 +668,19 @@ function Invoke-SkillRound {
     }
     elseif ($SkillName -ieq 'Transform') {
         if ($null -eq $Player.ActiveEffects) { $Player.ActiveEffects = @() }
-        $AlreadyTransformed = @($Player.ActiveEffects) | Where-Object { $_.Name -match "Hulk Form" -or $_.Name -match "Apex Alpha" } | Select-Object -First 1
+        $AlreadyTransformed = @($Player.ActiveEffects) | Where-Object { $_.Name -match "Hulk Form" } | Select-Object -First 1
         if ($null -ne $AlreadyTransformed) { return "You are already transformed!" }
+        
+        $IsExhausted = @($Player.ActiveEffects) | Where-Object { $_.Name -eq "Exhausted" } | Select-Object -First 1
+        if ($null -ne $IsExhausted) { return "Your body is too Exhausted to Transform!" }
+        
         $SPCost = 15; if ($IsFreeCast) { $SPCost = 0 }; if ($Player.SP -lt $SPCost) { return "Needs $SPCost SP." }; $Player.SP -= $SPCost
         $Player.HP = $Player.MaxHP
+        
         $Buff = [PSCustomObject]@{ Name="Hulk Form"; Duration=10; DoT=0; Modifiers=@{Strength=20} }
-        $Player.ActiveEffects = @($Player.ActiveEffects) + $Buff
-        $Message += "You roar as the virus mutates you into a raging HULK! HP fully restored and Strength surged for 10 turns."; $IsAttack = $false
+        $Exhaustion = [PSCustomObject]@{ Name="Exhausted"; Duration=13; DoT=0; Modifiers=@{} }
+        $Player.ActiveEffects = @($Player.ActiveEffects) + $Buff + $Exhaustion
+        $Message += "You roar as the virus mutates you into a raging HULK! HP fully restored and Strength surged. (Causes 13 turns of Exhaustion)"; $IsAttack = $false
     }
     elseif ($SkillName -ieq 'Eat Flesh') {
         $SPCost = 8
