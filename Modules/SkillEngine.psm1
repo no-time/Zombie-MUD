@@ -733,8 +733,11 @@ function Invoke-SkillRound {
         $Message += "🦇 BLOOD MIST! You vaporize your blood into a protective mist! Gained +$BonusDmg STR and +10 AC for 5 rounds, but you are now Exhausted!"; $IsAttack = $false
     }
     elseif ($SkillName -ieq 'Exsanguinate') {
-        # Fixed string to match 'Needs' so it doesn't pass a turn on failure
         if ($Player.BP -lt 70) { return "Needs 70 BP to unleash Exsanguinate!" }
+        
+        $IsExhausted = @($Player.ActiveEffects) | Where-Object { $_.Name -eq "Exhausted" } | Select-Object -First 1
+        if ($null -ne $IsExhausted) { return "You are too Exhausted to unleash Exsanguinate!" }
+
         $SPCost = 15; if ($IsFreeCast) { $SPCost = 0 }; if ($Player.SP -lt $SPCost) { return "Needs $SPCost SP." }; $Player.SP -= $SPCost
         
         $Player.BP = [math]::Min($Player.MaxBP, ($Player.BP + 5))
