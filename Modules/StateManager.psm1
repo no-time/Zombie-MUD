@@ -174,8 +174,8 @@ function Invoke-GameTick {
             }
         }
 
-        if ($null -ne $Mob.LootTable -and $Mob.LootTable.Count -gt 0) {
-            foreach ($Item in $Mob.LootTable) {
+        if ($null -ne $Mob.LootTable -and @($Mob.LootTable).Count -gt 0) {
+            foreach ($Item in @($Mob.LootTable)) {
                 $ItemData = Get-ItemStats -ItemName $Item
                 $IsUnique = ($null -ne $ItemData -and $ItemData.Type -eq "Trinket")
                 $AlreadyOwned = $false
