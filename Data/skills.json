@@ -33,7 +33,7 @@
   "Skullcracker": { "Class": "Bruiser", "Cost": "Passive", "Price": 1500, "MinLevel": 20, "Description": "5% chance to deal bonus STR damage and trigger a free Brace." },
   "Reflective Armor": { "Class": "Tank", "Cost": "Passive", "Price": 1500, "MinLevel": 20, "Description": "10% chance to perfectly reflect an attack and heal for half the damage." },
   "Rumor Mill": { "Class": "Popular", "Cost": "Passive", "Price": 1500, "MinLevel": 20, "Description": "5% chance per turn to confuse the enemy into attacking itself." },
-  "Stealth": { "Class": "Stealthy", "Cost": "Passive", "Price": 1500, "MinLevel": 20, "Description": "Permanent 90% evasion until you attack. Doubles Backstab damage from the shadows." },
+  "Stealth": { "Class": "Stealthy", "Cost": "0 SP", "Price": 1500, "MinLevel": 20, "Description": "Active: Enter 90% evasion until you attack. Doubles Backstab damage." },
   "Tactical Advantage": { "Class": "Tactician", "Cost": "Passive", "Price": 1500, "MinLevel": 20, "Description": "Weave in a free tactical strike at the end of every round." },
   "Mad Inventor": { "Class": "Technologist", "Cost": "Passive", "Price": 1500, "MinLevel": 20, "Description": "Type 'combine [item]' to fuse duplicates and legendary currencies into god-tier gear." },
   "Nothing Up My Sleeves": { "Class": "Charmed", "Cost": "Passive", "Price": 1500, "MinLevel": 20, "Description": "10% chance to gain 1 SP when using a skill. 5% chance the skill is completely free." },

@@ -40,15 +40,15 @@ function Invoke-TacticsProc {
         
         if ($Roll -eq 1) {
             $Existing = @($Mob.ActiveEffects) | Where-Object { $_.Name -eq "Tactical Stun" } | Select-Object -First 1
-            if ($null -ne $Existing) { $Existing.Duration = 2 } else { $Mob.ActiveEffects += [PSCustomObject]@{ Name="Tactical Stun"; Duration=2; DoT=0; Modifiers=@{} } }
+            if ($null -ne $Existing) { $Existing.Duration = 2 } else { $Mob.ActiveEffects = @($Mob.ActiveEffects) + [PSCustomObject]@{ Name="Tactical Stun"; Duration=2; DoT=0; Modifiers=@{} } }
             $TacMsgs += "🧠 TACTICS PROC! You cleverly Stun the $($Mob.Name)! They cannot use basic attacks for 2 turns."
         } elseif ($Roll -eq 2) {
             $Existing = @($Mob.ActiveEffects) | Where-Object { $_.Name -eq "Tactical Flinch" } | Select-Object -First 1
-            if ($null -ne $Existing) { $Existing.Duration = 3 } else { $Mob.ActiveEffects += [PSCustomObject]@{ Name="Tactical Flinch"; Duration=3; DoT=0; Modifiers=@{} } }
+            if ($null -ne $Existing) { $Existing.Duration = 3 } else { $Mob.ActiveEffects = @($Mob.ActiveEffects) + [PSCustomObject]@{ Name="Tactical Flinch"; Duration=3; DoT=0; Modifiers=@{} } }
             $TacMsgs += "🧠 TACTICS PROC! You force the $($Mob.Name) to Flinch! Their special skills fail for 3 turns."
         } else {
             $Existing = @($Mob.ActiveEffects) | Where-Object { $_.Name -eq "Tactical Tumble" } | Select-Object -First 1
-            if ($null -ne $Existing) { $Existing.Duration = 1 } else { $Mob.ActiveEffects += [PSCustomObject]@{ Name="Tactical Tumble"; Duration=1; DoT=0; Modifiers=@{} } }
+            if ($null -ne $Existing) { $Existing.Duration = 1 } else { $Mob.ActiveEffects = @($Mob.ActiveEffects) + [PSCustomObject]@{ Name="Tactical Tumble"; Duration=1; DoT=0; Modifiers=@{} } }
             $TacMsgs += "🧠 TACTICS PROC! You trip the $($Mob.Name), causing them to Tumble! They lose their next turn!"
             $RawDmg = Get-CalculatedDamage -Str $Player.Strength -Dex $Player.Dexterity -WeaponDmg $Player.Damage -IsCrit $false
             $OppDmg = [math]::Max(0, ($RawDmg - $Mob.Armor))
@@ -89,38 +89,38 @@ function Invoke-ElementProc {
 
     switch ($Element) {
         "Radioactive" {
-            if ($null -eq $IsRad) { $Mob.ActiveEffects += [PSCustomObject]@{ Name="Radioactive"; Duration=10; DoT=0; Modifiers=@{} }; $ProcMsgs += "☢️ RADIOACTIVE PROC! The $($Mob.Name) is glowing violently! Future attacks will shred their Max HP!" }
+            if ($null -eq $IsRad) { $Mob.ActiveEffects = @($Mob.ActiveEffects) + [PSCustomObject]@{ Name="Radioactive"; Duration=10; DoT=0; Modifiers=@{} }; $ProcMsgs += "☢️ RADIOACTIVE PROC! The $($Mob.Name) is glowing violently! Future attacks will shred their Max HP!" }
         }
         "Fire" {
-            if ($null -ne $IsBurning) { $IsBurning.Duration = 5 } else { $Mob.ActiveEffects += [PSCustomObject]@{ Name="Burning"; Duration=5; DoT=8; Modifiers=@{} }; $ProcMsgs += "🔥 FIRE PROC! The $($Mob.Name) bursts into searing flames!" }
+            if ($null -ne $IsBurning) { $IsBurning.Duration = 5 } else { $Mob.ActiveEffects = @($Mob.ActiveEffects) + [PSCustomObject]@{ Name="Burning"; Duration=5; DoT=8; Modifiers=@{} }; $ProcMsgs += "🔥 FIRE PROC! The $($Mob.Name) bursts into searing flames!" }
         }
         "Cryogenis" {
-            $Mob.ActiveEffects += [PSCustomObject]@{ Name="Frozen"; Duration=2; DoT=0; Modifiers=@{} }
-            $Mob.ActiveEffects += [PSCustomObject]@{ Name="Slowed"; Duration=3; DoT=0; Modifiers=@{Damage=-[math]::Floor($Mob.BaseDamage / 2)} }
+            $Mob.ActiveEffects = @($Mob.ActiveEffects) + [PSCustomObject]@{ Name="Frozen"; Duration=2; DoT=0; Modifiers=@{} }
+            $Mob.ActiveEffects = @($Mob.ActiveEffects) + [PSCustomObject]@{ Name="Slowed"; Duration=3; DoT=0; Modifiers=@{Damage=-[math]::Floor($Mob.BaseDamage / 2)} }
             $ProcMsgs += "❄️ CRYOGENIS PROC! The $($Mob.Name) is flash-frozen!"
         }
         "Bloodwerk" {
             $IsExhausted = @($Player.ActiveEffects) | Where-Object { $_.Name -eq "Exhausted" } | Select-Object -First 1
             if ($null -eq $IsExhausted) {
                 $BloodDoT = [math]::Max(1, [math]::Floor($FinalDmg / 10))
-                $Mob.ActiveEffects += [PSCustomObject]@{ Name="Blood Drain"; Duration=3; DoT=$BloodDoT; Modifiers=@{} }
+                $Mob.ActiveEffects = @($Mob.ActiveEffects) + [PSCustomObject]@{ Name="Blood Drain"; Duration=3; DoT=$BloodDoT; Modifiers=@{} }
                 $ExistingLust = @($Player.ActiveEffects) | Where-Object { $_.Name -eq "Bloodlust" } | Select-Object -First 1
                 if ($null -eq $ExistingLust) {
-                    $Player.ActiveEffects += [PSCustomObject]@{ Name="Bloodlust"; Duration=3; DoT=0; Modifiers=@{} }
-                    $Player.ActiveEffects += [PSCustomObject]@{ Name="Exhausted"; Duration=10; DoT=0; Modifiers=@{} }
+                    $Player.ActiveEffects = @($Player.ActiveEffects) + [PSCustomObject]@{ Name="Bloodlust"; Duration=3; DoT=0; Modifiers=@{} }
+                    $Player.ActiveEffects = @($Player.ActiveEffects) + [PSCustomObject]@{ Name="Exhausted"; Duration=10; DoT=0; Modifiers=@{} }
                     $ProcMsgs += "🩸 BLOODWERK PROC! You enter a furious Bloodlust! You will attack twice per turn!"
                 }
             }
         }
         "Bonewerk" {
             $ExistingBone = @($Player.ActiveEffects) | Where-Object { $_.Name -eq "Bone Armor" } | Select-Object -First 1
-            if ($null -ne $ExistingBone) { $ExistingBone.Duration = 3 } else { $Player.ActiveEffects += [PSCustomObject]@{ Name="Bone Armor"; Duration=3; DoT=0; Modifiers=@{Armor=5} } }
+            if ($null -ne $ExistingBone) { $ExistingBone.Duration = 3 } else { $Player.ActiveEffects = @($Player.ActiveEffects) + [PSCustomObject]@{ Name="Bone Armor"; Duration=3; DoT=0; Modifiers=@{Armor=5} } }
             $Player.MaxHP += 1; $Player.HP += 1; $Player.Bonechips += $ProcMult
             $ProcMsgs += "💀 BONEWERK PROC! Bones harden (+5 AC). Gained +1 Max HP! (+$ProcMult Bonechips)"
         }
         "Explosive" {
             $ExistingExp = @($Player.ActiveEffects) | Where-Object { $_.Name -eq "Explosive Ammo" } | Select-Object -First 1
-            if ($null -ne $ExistingExp) { $ExistingExp.Duration = 2 } else { $Player.ActiveEffects += [PSCustomObject]@{ Name="Explosive Ammo"; Duration=2; DoT=0; Modifiers=@{} } }
+            if ($null -ne $ExistingExp) { $ExistingExp.Duration = 2 } else { $Player.ActiveEffects = @($Player.ActiveEffects) + [PSCustomObject]@{ Name="Explosive Ammo"; Duration=2; DoT=0; Modifiers=@{} } }
             $Player.Gunpowder += $ProcMult
             $ProcMsgs += "💥 EXPLOSIVE PROC! Next criticals deal double damage! (+$ProcMult Gunpowder)"
             if ($Player.Class -eq "Immune Human") { $Player.Ammo = $Player.MaxAmmo; $ProcMsgs += "💥 Your Ammo is completely refilled!" }
@@ -139,7 +139,7 @@ function Invoke-ElementProc {
         "Putrid" {
             $TCloudDmg = $Player.Damage + 15 + $Player.Infectivity 
             $Mob.HP -= $TCloudDmg
-            $Mob.ActiveEffects += [PSCustomObject]@{ Name="Zombie Rot"; Duration=4; DoT=($Player.Infectivity + 10); Modifiers=@{} }
+            $Mob.ActiveEffects = @($Mob.ActiveEffects) + [PSCustomObject]@{ Name="Zombie Rot"; Duration=4; DoT=($Player.Infectivity + 10); Modifiers=@{} }
             $Player.ToxicGarnets += $ProcMult
             $ProcMsgs += "🤢 PUTRID PROC! You exhale a Toxic Cloud for $TCloudDmg damage! (+$ProcMult Toxic Garnets)"
             if ($null -ne $Player.ActivePet) { $Player.ActivePet.HP = $Player.ActivePet.MaxHP; $ProcMsgs += "🤢 Fumes fully heal your $($Player.ActivePet.Name)!" }
@@ -224,7 +224,7 @@ function Invoke-MobTurn {
         if ($Player.LearnedSkills -contains "Rotting Touch" -and -not $IsTargetingPet -and (-not $Mob.IsImmune -and -not $Mob.IsBoss)) {
             if ((Get-Random -Min 1 -Max 101) -le 10) {
                 if ($null -eq $Mob.ActiveEffects) { $Mob.ActiveEffects = @() }
-                $Mob.ActiveEffects += [PSCustomObject]@{ Name="Zombie Rot"; Duration=3; DoT=($Player.Infectivity + 10); Modifiers=@{} }
+                $Mob.ActiveEffects = @($Mob.ActiveEffects) + [PSCustomObject]@{ Name="Zombie Rot"; Duration=3; DoT=($Player.Infectivity + 10); Modifiers=@{} }
                 $Message += "`n> ☣️ ROTTING TOUCH! Your infected blood splatters, causing Zombie Rot!"
             }
         }
@@ -244,17 +244,28 @@ function Invoke-MobTurn {
             
             switch ($ChosenSkill) {
                 { $_ -in "Bite", "Eat Flesh" } { $SkillDmg = [math]::Max(0, (($Mob.Damage + 10) - $TargetArmor)); $Heal = 15; $Mob.HP = [math]::Min($Mob.MaxHP, ($Mob.HP + $Heal)); $Message += "`n> The $($Mob.Name) uses $ChosenSkill on $TargetName for $SkillDmg damage and heals 15 HP!" }
-                { $_ -in "Brace", "Focus" } { $Heal = 25; $Mob.HP = [math]::Min($Mob.MaxHP, ($Mob.HP + $Heal)); if ($null -eq $Mob.ActiveEffects) { $Mob.ActiveEffects = @() }; $ExistingBuff = @($Mob.ActiveEffects) | Where-Object { $_.Name -eq "Mob Buff" } | Select-Object -First 1; if ($null -ne $ExistingBuff) { $ExistingBuff.Duration = 3; $Message += "`n> The $($Mob.Name) uses $ChosenSkill! It heals 25 HP and refreshes its Armor buff." } else { $Buff = [PSCustomObject]@{ Name="Mob Buff"; Duration=3; DoT=0; Modifiers=@{Armor=5} }; $Mob.ActiveEffects += $Buff; $Message += "`n> The $($Mob.Name) uses $ChosenSkill! It heals 25 HP and gains +5 Armor." } }
-                { $_ -in "Toxic Cloud", "Lob Tissue" } { $SkillDmg = [math]::Max(0, ($Mob.Damage - $TargetArmor)); if ($IsTargetingPet) { $SkillDmg += 15; $Message += "`n> The $($Mob.Name) uses $ChosenSkill on $TargetName for $SkillDmg damage!" } else { if ($null -eq $Player.ActiveEffects) { $Player.ActiveEffects = @() }; $ExistingInf = @($Player.ActiveEffects) | Where-Object { $_.Name -eq "Infected Wound" } | Select-Object -First 1; if ($null -ne $ExistingInf) { $ExistingInf.Duration = 3; $Message += "`n> The $($Mob.Name) uses $ChosenSkill on $TargetName for $SkillDmg damage! Your Infected Wound is renewed." } else { $DoT = [PSCustomObject]@{ Name="Infected Wound"; Duration=3; DoT=5; Modifiers=@{} }; $Player.ActiveEffects += $DoT; $Message += "`n> The $($Mob.Name) uses $ChosenSkill on $TargetName for $SkillDmg damage! You are poisoned (5 DoT)." } } }
+                { $_ -eq "Brace" } {
+                    $Heal = 25; $Mob.HP = [math]::Min($Mob.MaxHP, ($Mob.HP + $Heal))
+                    if ($null -eq $Mob.ActiveEffects) { $Mob.ActiveEffects = @() }
+                    $ExistingBuff = @($Mob.ActiveEffects) | Where-Object { $_.Name -eq "Mob Buff" } | Select-Object -First 1
+                    if ($null -ne $ExistingBuff) { $ExistingBuff.Duration = 3; $Message += "`n> The $($Mob.Name) uses Brace! It heals 25 HP and refreshes its Armor buff." } 
+                    else { $Buff = [PSCustomObject]@{ Name="Mob Buff"; Duration=3; DoT=0; Modifiers=@{Armor=5} }; $Mob.ActiveEffects = @($Mob.ActiveEffects) + $Buff; $Message += "`n> The $($Mob.Name) uses Brace! It heals 25 HP and gains +5 Armor." }
+                }
+                { $_ -eq "Focus" } {
+                    $Heal = 15; $Mob.HP = [math]::Min($Mob.MaxHP, ($Mob.HP + $Heal))
+                    $Message += "`n> The $($Mob.Name) uses Focus and recovers 15 HP!"
+                }
+                { $_ -in "Toxic Cloud", "Lob Tissue" } { $SkillDmg = [math]::Max(0, ($Mob.Damage - $TargetArmor)); if ($IsTargetingPet) { $SkillDmg += 15; $Message += "`n> The $($Mob.Name) uses $ChosenSkill on $TargetName for $SkillDmg damage!" } else { if ($null -eq $Player.ActiveEffects) { $Player.ActiveEffects = @() }; $ExistingInf = @($Player.ActiveEffects) | Where-Object { $_.Name -eq "Infected Wound" } | Select-Object -First 1; if ($null -ne $ExistingInf) { $ExistingInf.Duration = 3; $Message += "`n> The $($Mob.Name) uses $ChosenSkill on $TargetName for $SkillDmg damage! Your Infected Wound is renewed." } else { $DoT = [PSCustomObject]@{ Name="Infected Wound"; Duration=3; DoT=5; Modifiers=@{} }; $Player.ActiveEffects = @($Player.ActiveEffects) + $DoT; $Message += "`n> The $($Mob.Name) uses $ChosenSkill on $TargetName for $SkillDmg damage! You are poisoned (5 DoT)." } } }
                 { $_ -eq "Slam" } { $SkillDmg = [math]::Max(0, ([math]::Floor($Mob.Damage * 1.5) - $TargetArmor)); $Message += "`n> The $($Mob.Name) unleashes Slam on $TargetName for a massive $SkillDmg damage!" }
-                { $_ -eq "Cleave" } { $SkillDmg = [math]::Max(0, ([math]::Floor($Mob.Damage * 1.5) - $TargetArmor)); if ($IsTargetingPet) { $Message += "`n> The $($Mob.Name) unleashes Cleave on $TargetName for $SkillDmg damage!" } else { if ($null -eq $Player.ActiveEffects) { $Player.ActiveEffects = @() }; $ExistingSunder = @($Player.ActiveEffects) | Where-Object { $_.Name -eq "Sundered Armor" } | Select-Object -First 1; if ($null -ne $ExistingSunder) { $ExistingSunder.Duration = 3; $Message += "`n> The $($Mob.Name) unleashes Cleave on $TargetName for $SkillDmg damage! Your defenses remain sundered." } else { $Sunder = [PSCustomObject]@{ Name="Sundered Armor"; Duration=3; DoT=0; Modifiers=@{Armor=-3} }; $Player.ActiveEffects += $Sunder; $Message += "`n> The $($Mob.Name) unleashes Cleave on $TargetName for $SkillDmg damage, shattering your defenses (-3 AC)!" } } }
-                { $_ -eq "Backstab" } { $SkillDmg = [math]::Max(0, ([math]::Floor($Mob.Damage * 1.5) - $TargetArmor)); if ($IsTargetingPet) { $Message += "`n> The $($Mob.Name) backstabs $TargetName for $SkillDmg damage!" } else { if ($null -eq $Player.ActiveEffects) { $Player.ActiveEffects = @() }; $ExistingBleed = @($Player.ActiveEffects) | Where-Object { $_.Name -eq "Bleeding" } | Select-Object -First 1; if ($null -ne $ExistingBleed) { $ExistingBleed.Duration = 4; $Message += "`n> The $($Mob.Name) backstabs $TargetName for $SkillDmg damage! Your bleeding wound is torn open again!" } else { $Bleed = [PSCustomObject]@{ Name="Bleeding"; Duration=4; DoT=12; Modifiers=@{} }; $Player.ActiveEffects += $Bleed; $Message += "`n> The $($Mob.Name) backstabs $TargetName for $SkillDmg damage, leaving a gaping bleeding wound (12 DoT)!" } } }
-                { $_ -eq "Transform" } { $Mob.HP = $Mob.MaxHP; if ($null -eq $Mob.ActiveEffects) { $Mob.ActiveEffects = @() }; $ExistingHulk = @($Mob.ActiveEffects) | Where-Object { $_.Name -eq "Hulk Form" } | Select-Object -First 1; if ($null -ne $ExistingHulk) { $ExistingHulk.Duration = 10; $Message += "`n> The $($Mob.Name) roars, refreshing its Hulk Form! HP fully restored." } else { $Buff = [PSCustomObject]@{ Name="Hulk Form"; Duration=10; DoT=0; Modifiers=@{Damage=20} }; $Mob.ActiveEffects += $Buff; $Message += "`n> The $($Mob.Name) mutates into a raging HULK! HP fully restored and gains +20 Damage for 10 turns." } }
-                { $_ -eq "Overload" } { $SkillDmg = [math]::Max(0, (($Mob.Damage + 15) - $TargetArmor)); if ($IsTargetingPet) { $Message += "`n> The $($Mob.Name) blasts $TargetName with Overload for $SkillDmg damage!" } else { if ($null -eq $Player.ActiveEffects) { $Player.ActiveEffects = @() }; $ExistingShock = @($Player.ActiveEffects) | Where-Object { $_.Name -eq "Shocked" } | Select-Object -First 1; if ($null -ne $ExistingShock) { $ExistingShock.Duration = 3; $Message += "`n> The $($Mob.Name) blasts $TargetName with Overload for $SkillDmg damage! You remain Shocked." } else { $Shock = [PSCustomObject]@{ Name="Shocked"; Duration=3; DoT=5; Modifiers=@{Damage=-3} }; $Player.ActiveEffects += $Shock; $Message += "`n> The $($Mob.Name) blasts $TargetName with Overload for $SkillDmg damage! You are Shocked (5 DoT, -3 DMG)." } } }
-                { $_ -eq "Exploit" } { $SkillDmg = [math]::Max(0, (($Mob.Damage + 10) - $TargetArmor)); if ($IsTargetingPet) { $Message += "`n> The $($Mob.Name) exploits a weakness on $TargetName for $SkillDmg damage!" } else { if ($null -eq $Player.ActiveEffects) { $Player.ActiveEffects = @() }; $ExistingExposed = @($Player.ActiveEffects) | Where-Object { $_.Name -eq "Exposed" } | Select-Object -First 1; if ($null -ne $ExistingExposed) { $ExistingExposed.Duration = 3; $Message += "`n> The $($Mob.Name) exploits a weakness on $TargetName for $SkillDmg damage! You remain Exposed." } else { $Exposed = [PSCustomObject]@{ Name="Exposed"; Duration=3; DoT=0; Modifiers=@{Armor=-5; Damage=-2} }; $Player.ActiveEffects += $Exposed; $Message += "`n> The $($Mob.Name) exploits a weakness on $TargetName for $SkillDmg damage! You are Exposed (-5 AC, -2 DMG)." } } }
-                { $_ -eq "Lucky Strike" } { $SkillDmg = [math]::Max(0, (($Mob.Damage + 25) - $TargetArmor)); $Message += "`n> The $($Mob.Name) swings blindly with a Lucky Strike on $TargetName for $SkillDmg damage!"; if ($null -eq $Mob.ActiveEffects) { $Mob.ActiveEffects = @() }; $ExistingLuck = @($Mob.ActiveEffects) | Where-Object { $_.Name -eq "Charmed Aura" } | Select-Object -First 1; if ($null -ne $ExistingLuck) { $ExistingLuck.Duration = 3 } else { $LuckAura = [PSCustomObject]@{ Name="Charmed Aura"; Duration=3; DoT=0; Modifiers=@{Damage=5} }; $Mob.ActiveEffects += $LuckAura } }
+                { $_ -eq "Cleave" } { $SkillDmg = [math]::Max(0, ([math]::Floor($Mob.Damage * 1.5) - $TargetArmor)); if ($IsTargetingPet) { $Message += "`n> The $($Mob.Name) unleashes Cleave on $TargetName for $SkillDmg damage!" } else { if ($null -eq $Player.ActiveEffects) { $Player.ActiveEffects = @() }; $ExistingSunder = @($Player.ActiveEffects) | Where-Object { $_.Name -eq "Sundered Armor" } | Select-Object -First 1; if ($null -ne $ExistingSunder) { $ExistingSunder.Duration = 3; $Message += "`n> The $($Mob.Name) unleashes Cleave on $TargetName for $SkillDmg damage! Your defenses remain sundered." } else { $Sunder = [PSCustomObject]@{ Name="Sundered Armor"; Duration=3; DoT=0; Modifiers=@{Armor=-3} }; $Player.ActiveEffects = @($Player.ActiveEffects) + $Sunder; $Message += "`n> The $($Mob.Name) unleashes Cleave on $TargetName for $SkillDmg damage, shattering your defenses (-3 AC)!" } } }
+                { $_ -eq "Backstab" } { $SkillDmg = [math]::Max(0, ([math]::Floor($Mob.Damage * 1.5) - $TargetArmor)); if ($IsTargetingPet) { $Message += "`n> The $($Mob.Name) backstabs $TargetName for $SkillDmg damage!" } else { if ($null -eq $Player.ActiveEffects) { $Player.ActiveEffects = @() }; $ExistingBleed = @($Player.ActiveEffects) | Where-Object { $_.Name -eq "Bleeding" } | Select-Object -First 1; if ($null -ne $ExistingBleed) { $ExistingBleed.Duration = 4; $Message += "`n> The $($Mob.Name) backstabs $TargetName for $SkillDmg damage! Your bleeding wound is torn open again!" } else { $Bleed = [PSCustomObject]@{ Name="Bleeding"; Duration=4; DoT=12; Modifiers=@{} }; $Player.ActiveEffects = @($Player.ActiveEffects) + $Bleed; $Message += "`n> The $($Mob.Name) backstabs $TargetName for $SkillDmg damage, leaving a gaping bleeding wound (12 DoT)!" } } }
+                { $_ -eq "Transform" } { $Mob.HP = $Mob.MaxHP; if ($null -eq $Mob.ActiveEffects) { $Mob.ActiveEffects = @() }; $ExistingHulk = @($Mob.ActiveEffects) | Where-Object { $_.Name -eq "Hulk Form" } | Select-Object -First 1; if ($null -ne $ExistingHulk) { $ExistingHulk.Duration = 10; $Message += "`n> The $($Mob.Name) roars, refreshing its Hulk Form! HP fully restored." } else { $Buff = [PSCustomObject]@{ Name="Hulk Form"; Duration=10; DoT=0; Modifiers=@{Damage=20} }; $Mob.ActiveEffects = @($Mob.ActiveEffects) + $Buff; $Message += "`n> The $($Mob.Name) mutates into a raging HULK! HP fully restored and gains +20 Damage for 10 turns." } }
+                { $_ -eq "Overload" } { $SkillDmg = [math]::Max(0, (($Mob.Damage + 15) - $TargetArmor)); if ($IsTargetingPet) { $Message += "`n> The $($Mob.Name) blasts $TargetName with Overload for $SkillDmg damage!" } else { if ($null -eq $Player.ActiveEffects) { $Player.ActiveEffects = @() }; $ExistingShock = @($Player.ActiveEffects) | Where-Object { $_.Name -eq "Shocked" } | Select-Object -First 1; if ($null -ne $ExistingShock) { $ExistingShock.Duration = 3; $Message += "`n> The $($Mob.Name) blasts $TargetName with Overload for $SkillDmg damage! You remain Shocked." } else { $Shock = [PSCustomObject]@{ Name="Shocked"; Duration=3; DoT=5; Modifiers=@{Damage=-3} }; $Player.ActiveEffects = @($Player.ActiveEffects) + $Shock; $Message += "`n> The $($Mob.Name) blasts $TargetName with Overload for $SkillDmg damage! You are Shocked (5 DoT, -3 DMG)." } } }
+                { $_ -eq "Exploit" } { $SkillDmg = [math]::Max(0, (($Mob.Damage + 10) - $TargetArmor)); if ($IsTargetingPet) { $Message += "`n> The $($Mob.Name) exploits a weakness on $TargetName for $SkillDmg damage!" } else { if ($null -eq $Player.ActiveEffects) { $Player.ActiveEffects = @() }; $ExistingExposed = @($Player.ActiveEffects) | Where-Object { $_.Name -eq "Exposed" } | Select-Object -First 1; if ($null -ne $ExistingExposed) { $ExistingExposed.Duration = 3; $Message += "`n> The $($Mob.Name) exploits a weakness on $TargetName for $SkillDmg damage! You remain Exposed." } else { $Exposed = [PSCustomObject]@{ Name="Exposed"; Duration=3; DoT=0; Modifiers=@{Armor=-5; Damage=-2} }; $Player.ActiveEffects = @($Player.ActiveEffects) + $Exposed; $Message += "`n> The $($Mob.Name) exploits a weakness on $TargetName for $SkillDmg damage! You are Exposed (-5 AC, -2 DMG)." } } }
+                { $_ -eq "Lucky Strike" } { $SkillDmg = [math]::Max(0, (($Mob.Damage + 25) - $TargetArmor)); $Message += "`n> The $($Mob.Name) swings blindly with a Lucky Strike on $TargetName for $SkillDmg damage!"; if ($null -eq $Mob.ActiveEffects) { $Mob.ActiveEffects = @() }; $ExistingLuck = @($Mob.ActiveEffects) | Where-Object { $_.Name -eq "Charmed Aura" } | Select-Object -First 1; if ($null -ne $ExistingLuck) { $ExistingLuck.Duration = 3 } else { $LuckAura = [PSCustomObject]@{ Name="Charmed Aura"; Duration=3; DoT=0; Modifiers=@{Damage=5} }; $Mob.ActiveEffects = @($Mob.ActiveEffects) + $LuckAura } }
                 default { $SkillDmg = [math]::Max(0, ($Mob.Damage - $TargetArmor)); $Message += "`n> The $($Mob.Name) uses $ChosenSkill on $TargetName for $SkillDmg damage!" }
             }
+            
             if ($IsTargetingPet) { $Player.ActivePet.HP -= $SkillDmg } else { $Player.HP -= $SkillDmg }
             
         } else {
@@ -276,7 +287,6 @@ function Invoke-MobTurn {
         $Message += "`n> YOUR PET HAS FALLEN! The $($Player.ActivePet.Name) collapses lifelessly to the ground."
         $Player.ActivePet = $null
     }
-
     return $Message
 }
 
@@ -301,7 +311,9 @@ function Invoke-CombatRound {
             $ODmg = [math]::Max(0, ($RawDmg + ($Player.Int * 4) - $Mob.Armor))
             $Mob.HP -= $ODmg
             if ($null -eq $Mob.ActiveEffects) { $Mob.ActiveEffects = @() }
-            $Mob.ActiveEffects += [PSCustomObject]@{ Name="Shocked"; Duration=3; DoT=5; Modifiers=@{Damage=-3} }
+            $ExistingShock = @($Mob.ActiveEffects) | Where-Object { $_.Name -eq "Shocked" } | Select-Object -First 1
+            if ($null -ne $ExistingShock) { $ExistingShock.Duration = 3 }
+            else { $Mob.ActiveEffects = @($Mob.ActiveEffects) + [PSCustomObject]@{ Name="Shocked"; Duration=3; DoT=5; Modifiers=@{Damage=-3} } }
             $RoundMessages += "⚡ QUITE SHOCKING OVERLOAD! Stored static blasts the target for $ODmg damage and Shock!"
         }
     }
@@ -317,7 +329,7 @@ function Invoke-CombatRound {
         if ($Player.LearnedSkills -contains "Goo Shoes" -and (Get-Random -Min 1 -Max 101) -le 10) {
             if ($null -eq $Mob.ActiveEffects) { $Mob.ActiveEffects = @() }
             $Existing = @($Mob.ActiveEffects) | Where-Object { $_.Name -eq "Tactical Flinch" } | Select-Object -First 1
-            if ($null -ne $Existing) { $Existing.Duration = 3 } else { $Mob.ActiveEffects += [PSCustomObject]@{ Name="Tactical Flinch"; Duration=3; DoT=0; Modifiers=@{} } }
+            if ($null -ne $Existing) { $Existing.Duration = 3 } else { $Mob.ActiveEffects = @($Mob.ActiveEffects) + [PSCustomObject]@{ Name="Tactical Flinch"; Duration=3; DoT=0; Modifiers=@{} } }
             $RoundMessages += "🦠 GOO SHOES! Your attack splashes sticky mass, causing the enemy to Flinch!"
         }
 
@@ -325,7 +337,7 @@ function Invoke-CombatRound {
         $IsBeserkerHulkFrenzy = $false
         if ($Player.LearnedSkills -contains "Feeding Frenzy") {
             $IsFrenzy = @($Player.ActiveEffects) | Where-Object { $_.Name -eq "Feeding Frenzy" }
-            $IsHulk = @($Player.ActiveEffects) | Where-Object { $_.Name -eq "Hulk Form" }
+            $IsHulk = @($Player.ActiveEffects) | Where-Object { $_.Name -match "Hulk Form" -or $_.Name -match "Apex Alpha" }
             if ($IsFrenzy -and $IsHulk) { $IsBeserkerHulkFrenzy = $true }
         }
 
@@ -334,8 +346,7 @@ function Invoke-CombatRound {
             $SuccessChance = 1 + [math]::Floor($Player.Infectivity / 2)
             
             if ($Mob.IsBoss -or $Mob.IsImmune) {
-                $B_Dmg = $Player.Damage + 10 + [math]::Floor($Player.Strength / 2)
-                $Mob.HP -= $B_Dmg
+                $B_Dmg = $Player.Damage + 10 + [math]::Floor($Player.Strength / 2); $Mob.HP -= $B_Dmg
                 $RoundMessages += "You tear into the $($Mob.Name) for $B_Dmg DMG!"
             } elseif ((Get-Random -Min 1 -Max 101) -le $SuccessChance) {
                 $HealAmount = $Mob.HP; $Player.HP = [math]::Min($Player.MaxHP, ($Player.HP + $HealAmount)); $Mob.HP = 0
@@ -344,8 +355,7 @@ function Invoke-CombatRound {
                     $RoundMessages += "INSTANT KILL! You healed for $HealAmount HP and the corpse rises as your pet!"
                 } else { $RoundMessages += "INSTANT KILL! You healed for $HealAmount HP!" }
             } else {
-                $B_Dmg = $Player.Damage + 10 + [math]::Floor($Player.Strength / 2)
-                $Mob.HP -= $B_Dmg
+                $B_Dmg = $Player.Damage + 10 + [math]::Floor($Player.Strength / 2); $Mob.HP -= $B_Dmg
                 $RoundMessages += "You chew on the $($Mob.Name) for $B_Dmg DMG!"
             }
         } 
@@ -381,7 +391,7 @@ function Invoke-CombatRound {
                                 $HasRot.Duration = 3; $RoundMessages += "Your infectious touch renews the Zombie Rot on the $($Mob.Name)!"
                             } else {
                                 $RotDmg = [math]::Max(2, [math]::Floor($Player.Infectivity / 2))
-                                $Mob.ActiveEffects += [PSCustomObject]@{ Name="Zombie Rot"; Duration=3; DoT=$RotDmg; Modifiers=@{} }
+                                $Mob.ActiveEffects = @($Mob.ActiveEffects) + [PSCustomObject]@{ Name="Zombie Rot"; Duration=3; DoT=$RotDmg; Modifiers=@{} }
                                 $RoundMessages += "Your infectious touch takes hold! The $($Mob.Name) is inflicted with Zombie Rot ($RotDmg DoT)."
                             }
                         }
@@ -399,7 +409,7 @@ function Invoke-CombatRound {
                     if ($null -ne $ExistingBrace) {
                         $ExistingBrace.Duration = 3; $RoundMessages += "> Momentum triggers Brace! Healed $Heal HP and refreshed Armor buff."
                     } else {
-                        $Player.ActiveEffects += [PSCustomObject]@{ Name="Braced"; Duration=3; DoT=0; Modifiers=@{Armor=5} }
+                        $Player.ActiveEffects = @($Player.ActiveEffects) + [PSCustomObject]@{ Name="Braced"; Duration=3; DoT=0; Modifiers=@{Armor=5} }
                         $RoundMessages += "> Momentum triggers Brace! Healed $Heal HP and gained +5 Armor for 3 turns."
                     }
                 }
@@ -487,7 +497,7 @@ function Invoke-CombatRound {
                                 $RoundMessages += "Your Legacy $($Player.ActivePet.Name) refreshes its battle aura!"
                             } else {
                                 $Buff = [PSCustomObject]@{ Name="Pet Aura"; Duration=2; DoT=0; Modifiers=@{Strength=$BuffStr; Armor=$BuffAC} }
-                                $Player.ActiveEffects += $Buff; $RoundMessages += "Your Legacy $($Player.ActivePet.Name) grants a battle aura! +$BuffStr STR, +$BuffAC AC."
+                                $Player.ActiveEffects = @($Player.ActiveEffects) + $Buff; $RoundMessages += "Your Legacy $($Player.ActivePet.Name) grants a battle aura! +$BuffStr STR, +$BuffAC AC."
                             }
                         }
                         "Damage" {
@@ -510,107 +520,6 @@ function Invoke-CombatRound {
                     $Mob.HP -= $PetDmg; $RoundMessages += "Your $($Player.ActivePet.Name) attacks for $PetDmg damage!"
                 }
             }
-        }
-
-        # --- UNIFIED DEATH CHECK & UNIQUE LOOT FILTER ---
-        if ($Mob.HP -le 0) {
-            $RoundMessages += "The $($Mob.Name) has been defeated!"
-            $Player.XP += $Mob.XP; $Player.Currency += $Mob.Scrap
-            $RoundMessages += "You gained $($Mob.XP) XP and found $($Mob.Scrap) scrap coins."
-
-            # --- BESERKER 10: BLOODTHIRST ---
-            if ($Player.LearnedSkills -contains "Bloodthirst") {
-                $Heal = [math]::Floor($Player.MaxHP * 0.10)
-                $Player.HP = [math]::Min($Player.MaxHP, $Player.HP + $Heal)
-                $RoundMessages += "🩸 BLOODTHIRST! The kill fuels you, recovering $Heal HP!"
-            }
-
-            if ($null -eq $Player.ActivePet) {
-                $HasCurse = @($Mob.ActiveEffects) | Where-Object { $_.Name -eq "Blood Curse" }
-                $HasRot = @($Mob.ActiveEffects) | Where-Object { $_.Name -eq "Zombie Rot" }
-
-                if ($null -ne $HasCurse) {
-                    $Player.ActivePet = [PSCustomObject]@{ Name="Vampiric $($Mob.Name)"; Level=$Mob.Level; XP=0; MaxHP=($Mob.MaxHP + $Player.PetBonusHP); HP=($Mob.MaxHP + $Player.PetBonusHP); Damage=$Mob.Damage; Armor=$Mob.Armor; IsLegacyPet = $false }
-                    $RoundMessages += "The Blood Curse takes hold... The $($Mob.Name) resurrects as your Vampiric servant!"
-                } elseif ($null -ne $HasRot) {
-                    if (Invoke-InfectionCheck -Infectivity $Player.Infectivity) {
-                        $Player.ActivePet = [PSCustomObject]@{ Name="Rotting $($Mob.Name)"; Level=$Mob.Level; XP=0; MaxHP=($Mob.MaxHP + $Player.PetBonusHP); HP=($Mob.MaxHP + $Player.PetBonusHP); Damage=$Mob.Damage; Armor=$Mob.Armor; IsLegacyPet = $false }
-                        $RoundMessages += "COIN FLIP WON: The Zombie Rot consumes the corpse... The $($Mob.Name) rises as your infected servant!"
-                    } else {
-                        $RoundMessages += "COIN FLIP FAILED: The $($Mob.Name)'s corpse rots into useless sludge."
-                    }
-                }
-            }
-
-            if ($null -ne $Player.ActivePet -and $Player.ActivePet.Level -lt 100) {
-                $Player.ActivePet.XP += $Mob.XP
-                $pLvl = $Player.ActivePet.Level; $NextXP = 10000
-                if ($pLvl -ge 99) { $NextXP = 1000000 } elseif ($pLvl -ge 61) { $NextXP = 250000 } elseif ($pLvl -ge 51) { $NextXP = 100000 }
-                elseif ($pLvl -ge 41) { $NextXP = 50000 } elseif ($pLvl -ge 36) { $NextXP = 25000 } elseif ($pLvl -ge 31) { $NextXP = 17500 }
-                elseif ($pLvl -ge 21) { $NextXP = 15000 } elseif ($pLvl -ge 11) { $NextXP = 12500 }
-
-                while ($Player.ActivePet.XP -ge $NextXP -and $Player.ActivePet.Level -lt 100) {
-                    $Player.ActivePet.Level += 1; $Player.ActivePet.XP -= $NextXP
-                    $Player.ActivePet.MaxHP += 15; $Player.ActivePet.HP = $Player.ActivePet.MaxHP
-                    $Player.ActivePet.Damage += 3; $Player.ActivePet.Armor += 1
-                    $RoundMessages += "YOUR PET LEVELED UP! The $($Player.ActivePet.Name) is now Level $($Player.ActivePet.Level)!"
-                    $pLvl = $Player.ActivePet.Level; $NextXP = 10000
-                    if ($pLvl -ge 99) { $NextXP = 1000000 } elseif ($pLvl -ge 61) { $NextXP = 250000 } elseif ($pLvl -ge 51) { $NextXP = 100000 }
-                    elseif ($pLvl -ge 41) { $NextXP = 50000 } elseif ($pLvl -ge 36) { $NextXP = 25000 } elseif ($pLvl -ge 31) { $NextXP = 17500 }
-                    elseif ($pLvl -ge 21) { $NextXP = 15000 } elseif ($pLvl -ge 11) { $NextXP = 12500 }
-                }
-            }
-            
-            if ($null -ne $Mob.LootTable -and $Mob.LootTable.Count -gt 0) {
-                foreach ($Item in $Mob.LootTable) {
-                    $ItemData = Get-ItemStats -ItemName $Item
-                    $IsUnique = ($null -ne $ItemData -and $ItemData.Type -eq "Trinket")
-                    $AlreadyOwned = $false
-                    if ($IsUnique) {
-                        $AllOwned = @($Player.Inventory) + @($Player.EquippedTrinket)
-                        if ($null -ne $LegacyBonuses -and $null -ne $LegacyBonuses.Stash) { $AllOwned += @($LegacyBonuses.Stash) }
-                        foreach ($Owned in $AllOwned) { if ($Owned -ieq $Item) { $AlreadyOwned = $true; break } }
-                    }
-                    if (-not $AlreadyOwned) {
-                        $Player.Inventory += $Item; $RoundMessages += "[LOOT] You picked up: $Item"
-                    } else {
-                        $RoundMessages += "[LOOT] You see a [$Item], but since it's a unique artifact you already possess, you leave it behind."
-                    }
-                }
-            }
-
-            # --- POPULAR 10: FRIENDS IN LOW PLACES ---
-            if ($Player.LearnedSkills -contains "Friends in Low Places") {
-                if ((Get-Random -Min 1 -Max 101) -le [math]::Floor($Player.Level / 10)) {
-                    $RatRewards = @("Scrap", "Bandage", "Energy Drink", "Combat Boots +1")
-                    $ChosenRat = $RatRewards | Get-Random
-                    if ($ChosenRat -eq "Scrap") { $RatVal = [math]::Max(1, [math]::Floor(0.1 * $Player.Level)); $Player.Currency += $RatVal; $RoundMessages += "🐀 A sewer rat scurries by and drops $RatVal Scrap!" }
-                    elseif ($ChosenRat -eq "Bandage") { for ($i=0; $i -lt $Player.Level; $i++) { $Player.Inventory += "Bandage" }; $RoundMessages += "🐀 A sewer rat scurries by and drops $($Player.Level)x Bandage!" }
-                    elseif ($ChosenRat -eq "Energy Drink") { $EDCount = [math]::Max(1, [math]::Floor(0.5 * $Player.Level)); for ($i=0; $i -lt $EDCount; $i++) { $Player.Inventory += "Energy Drink" }; $RoundMessages += "🐀 A sewer rat scurries by and drops ${EDCount}x Energy Drink!" }
-                    else { $Player.Inventory += "Combat Boots +1"; $RoundMessages += "🐀 A sewer rat scurries by and drops [Combat Boots +1]!" }
-                }
-            }
-
-            while ($Player.XP -ge $Player.NextLevelXP) {
-                $Player.Level += 1; $Player.MaxHP += 15; $Player.HP = $Player.MaxHP; $Player.MaxSP += 1; $Player.SP = $Player.MaxSP; 
-                $Player.BaseStrength += 2; $Player.Strength = $Player.BaseStrength
-                $Player.BaseDexterity += 2; $Player.Dexterity = $Player.BaseDexterity
-                
-                $Player.BaseCON += 1; $Player.CON = $Player.BaseCON
-                $Player.BaseCHA += 1; $Player.CHA = $Player.BaseCHA
-                $Player.BaseTactics += 1; $Player.Tactics = $Player.BaseTactics
-                $Player.BaseInt += 1; $Player.Int = $Player.BaseInt
-                $Player.BaseLuck += 1; $Player.Luck = $Player.BaseLuck
-                
-                if ($Player.Class -ne "Immune Human") { $Player.BaseInfectivity += 1; $Player.Infectivity = $Player.BaseInfectivity }
-                $Player.NextLevelXP = [math]::Round($Player.NextLevelXP * 1.5)
-                $RoundMessages += "LEVEL UP! You are now Level $($Player.Level)! Your stats have increased, and your HP and SP are fully restored."
-                
-                $NewClassSkills = Get-ClassSkills -ClassName $Player.Class -PlayerLevel $Player.Level
-                foreach ($sk in $NewClassSkills) { if ($Player.LearnedSkills -notcontains $sk) { $Player.LearnedSkills += $sk } }
-            }
-        } else {
-            $RoundMessages += Invoke-MobTurn -Player $Player -Mob $Mob
         }
     }
     elseif ($Action -in 'r', 'run') {
