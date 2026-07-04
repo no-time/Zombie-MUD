@@ -52,7 +52,6 @@ function Invoke-PlayerCommand {
                 if ($null -ne $RealItem) {
                     $ItemData = Get-ItemStats -ItemName $RealItem
                     if ($null -ne $ItemData -and $ItemData.Type -eq "Consumable") {
-                        $ItemUsed = $false
                         if ($RealItem -eq "Bandage") {
                             $Player.HP = [math]::Min($Player.MaxHP, ($Player.HP + $ItemData.Value))
                             $OutMsg += "You applied the [$RealItem] and recovered $($ItemData.Value) HP."
@@ -62,7 +61,7 @@ function Invoke-PlayerCommand {
                                 $OutMsg += "The tight wrapping completely stopped your bleeding!"
                             }
                             $InvList = [System.Collections.ArrayList]$Player.Inventory; $InvList.Remove($RealItem); $Player.Inventory = @($InvList)
-                            $ItemUsed = $true
+                            $PassTurn = $true
                         } elseif ($RealItem -eq "Energy Drink") {
                             if ($Player.SP -ge $Player.MaxSP -and ($null -eq (@($Player.ActiveEffects) | Where-Object { $_.Name -eq "Zombie Rot" -or $_.Name -eq "Infected Wound" }))) { 
                                 $OutMsg += "You feel jittery, but you are already at maximum stamina and have no infections to cure." 
@@ -75,7 +74,7 @@ function Invoke-PlayerCommand {
                                     $OutMsg += "The intense chemical rush purged the infection from your veins!"
                                 }
                                 $InvList = [System.Collections.ArrayList]$Player.Inventory; $InvList.Remove($RealItem); $Player.Inventory = @($InvList)
-                                $ItemUsed = $true
+                                $PassTurn = $true
                             }
                         } elseif ($RealItem -eq "Pistol Ammo") {
                             if ($Player.Class -ne "Immune Human") { $OutMsg += "You have no idea how to use this." }
@@ -84,14 +83,8 @@ function Invoke-PlayerCommand {
                                 $Player.Ammo = [math]::Min($Player.MaxAmmo, ($Player.Ammo + $ItemData.Value))
                                 $OutMsg += "You loaded $($ItemData.Value) rounds into your Glock. (Ammo: $($Player.Ammo)/$($Player.MaxAmmo))"
                                 $InvList = [System.Collections.ArrayList]$Player.Inventory; $InvList.Remove($RealItem); $Player.Inventory = @($InvList)
-                                $ItemUsed = $true
+                                $PassTurn = $true
                             }
-                        }
-                        
-                        if ($ItemUsed) {
-                            $MobTurn = Invoke-MobTurn -Player $Player -Mob $Mob
-                            if (-not [string]::IsNullOrWhiteSpace($MobTurn)) { $OutMsg += $MobTurn -replace "^`n>\s*", "" }
-                            $PassTurn = $true
                         }
                     } else { $OutMsg += "You cannot use the [$RealItem] right now." }
                 } else {
@@ -99,10 +92,6 @@ function Invoke-PlayerCommand {
                     $OutMsg += $SkillRes
                     if ($SkillRes -notmatch "You do not know|Needs|already transformed|out of ammo|cannot use|You are too Exhausted") {
                         $PassTurn = $true
-                        if ($null -ne $Mob -and $Mob.HP -gt 0) {
-                            $MobTurn = Invoke-MobTurn -Player $Player -Mob $Mob
-                            if (-not [string]::IsNullOrWhiteSpace($MobTurn)) { $OutMsg += $MobTurn -replace "^`n>\s*", "" }
-                        }
                     }
                 }
             }
@@ -112,8 +101,6 @@ function Invoke-PlayerCommand {
                     $Player.HP = [math]::Min($Player.MaxHP, ($Player.HP + $HealAmount))
                     $OutMsg += "You drain the energy from the $($Player.ActivePet.Name), adding it to your own. You were healed for $HealAmount HP."
                     $Player.ActivePet = $null
-                    $MobTurn = Invoke-MobTurn -Player $Player -Mob $Mob
-                    if (-not [string]::IsNullOrWhiteSpace($MobTurn)) { $OutMsg += $MobTurn -replace "^`n>\s*", "" }
                     $PassTurn = $true
                 } else { $OutMsg += "You do not have an active pet to release!" }
             }
@@ -127,8 +114,6 @@ function Invoke-PlayerCommand {
                         $Player.Ammo = [math]::Min($Player.MaxAmmo, ($Player.Ammo + $ItemData.Value))
                         $OutMsg += "You slammed a new magazine into your Glock. (Ammo: $($Player.Ammo)/$($Player.MaxAmmo))"
                         $InvList = [System.Collections.ArrayList]$Player.Inventory; $InvList.Remove($AmmoItem); $Player.Inventory = @($InvList)
-                        $MobTurn = Invoke-MobTurn -Player $Player -Mob $Mob
-                        if (-not [string]::IsNullOrWhiteSpace($MobTurn)) { $OutMsg += $MobTurn -replace "^`n>\s*", "" }
                         $PassTurn = $true
                     } else { $OutMsg += "You reach into your pockets... but you are completely out of Pistol Ammo!" }
                 }
@@ -172,6 +157,15 @@ function Invoke-PlayerCommand {
                 $OutMsg += $Sheet -join "`n> "
             }
             default { $OutMsg += "You are in combat! Valid commands: 'attack', 'run', 'skills', 'use [skill/item]', 'release pet', 'reload', 'stats', 'char'" }
+        }
+
+        # --- CENTRALIZED ENEMY AI TURN ---
+        # Forces the Mob to attack back immediately after ANY valid combat action you take!
+        if ($PassTurn -and $null -ne $Mob -and $Mob.HP -gt 0) {
+            $MobTurn = Invoke-MobTurn -Player $Player -Mob $Mob
+            if (-not [string]::IsNullOrWhiteSpace($MobTurn)) { 
+                $OutMsg += $MobTurn -replace "^`n>\s*", "" 
+            }
         }
     }
     elseif ($null -ne $NPC) {
@@ -667,7 +661,6 @@ function Invoke-PlayerCommand {
                 if (-not $IsLocked) {
                     if ($Room.ExitMap.ContainsKey($IntendedDirection)) {
                         $RoomID = $Room.ExitMap[$IntendedDirection]; $OutMsg += "You travel $IntendedDirection."; $PassTurn = $true
-                        if ($Player.LearnedSkills -contains "Stealth" -and -not $Player.IsStealthed) { $Player.IsStealthed = $true; $OutMsg += "`n> 🌑 You naturally fade back into the shadows." }
                     } else { $OutMsg += "You cannot go that way." }
                 }
             }

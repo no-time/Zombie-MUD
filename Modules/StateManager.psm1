@@ -127,102 +127,97 @@ function Invoke-GameTick {
         $Mob.ActiveEffects = $RemainingMobEffects
         $Mob.Damage = [math]::Max(0, ($Mob.BaseDamage + $BonusMobDmg))
         $Mob.Armor  = [math]::Max(0, ($Mob.BaseArmor + $BonusMobArmor))
+    }
 
-        # --- 3. MOB DEATH FROM DOTS ---
-        if ($Mob.HP -le 0) {
-            $MobDied = $true
-            $Player.XP += $Mob.XP; $Player.Currency += $Mob.Scrap
-            $TickMsgs += "The $($Mob.Name) succumbed to its wounds and died! Gained $($Mob.XP) XP."
+    # --- 3. MOB DEATH LOGIC ---
+    if ($null -ne $Mob -and $Mob.HP -le 0) {
+        $MobDied = $true
+        $Player.XP += $Mob.XP; $Player.Currency += $Mob.Scrap
+        $TickMsgs += "The $($Mob.Name) succumbed to its wounds and died! Gained $($Mob.XP) XP."
 
-            if ($Player.LearnedSkills -contains "Stealth" -and -not $Player.IsStealthed) {
-                $Player.IsStealthed = $true
-                $TickMsgs += "🌑 You naturally fade back into the shadows."
-            }
+        if ($null -eq $Player.ActivePet) {
+            $HasCurse = @($Mob.ActiveEffects) | Where-Object { $_.Name -eq "Blood Curse" }
+            $HasRot = @($Mob.ActiveEffects) | Where-Object { $_.Name -eq "Zombie Rot" }
 
-            if ($null -eq $Player.ActivePet) {
-                $HasCurse = @($Mob.ActiveEffects) | Where-Object { $_.Name -eq "Blood Curse" }
-                $HasRot = @($Mob.ActiveEffects) | Where-Object { $_.Name -eq "Zombie Rot" }
-
-                if ($null -ne $HasCurse) {
-                    $Player.ActivePet = [PSCustomObject]@{ Name="Vampiric $($Mob.Name)"; Level=$Mob.Level; XP=0; MaxHP=($Mob.MaxHP + $Player.PetBonusHP); HP=($Mob.MaxHP + $Player.PetBonusHP); Damage=$Mob.Damage; Armor=$Mob.Armor; IsLegacyPet = $false }
-                    $TickMsgs += "The Blood Curse takes hold... The $($Mob.Name) resurrects as your Vampiric servant!"
-                } elseif ($null -ne $HasRot) {
-                    if (Invoke-InfectionCheck -Infectivity $Player.Infectivity) {
-                        $Player.ActivePet = [PSCustomObject]@{ Name="Rotting $($Mob.Name)"; Level=$Mob.Level; XP=0; MaxHP=($Mob.MaxHP + $Player.PetBonusHP); HP=($Mob.MaxHP + $Player.PetBonusHP); Damage=$Mob.Damage; Armor=$Mob.Armor; IsLegacyPet = $false }
-                        $TickMsgs += "COIN FLIP WON: The Zombie Rot consumes the corpse... The $($Mob.Name) rises as your infected servant!"
-                    } else {
-                        $TickMsgs += "COIN FLIP FAILED: The $($Mob.Name)'s corpse rots into useless sludge."
-                    }
+            if ($null -ne $HasCurse) {
+                $Player.ActivePet = [PSCustomObject]@{ Name="Vampiric $($Mob.Name)"; Level=$Mob.Level; XP=0; MaxHP=($Mob.MaxHP + $Player.PetBonusHP); HP=($Mob.MaxHP + $Player.PetBonusHP); Damage=$Mob.Damage; Armor=$Mob.Armor; IsLegacyPet = $false }
+                $TickMsgs += "The Blood Curse takes hold... The $($Mob.Name) resurrects as your Vampiric servant!"
+            } elseif ($null -ne $HasRot) {
+                if (Invoke-InfectionCheck -Infectivity $Player.Infectivity) {
+                    $Player.ActivePet = [PSCustomObject]@{ Name="Rotting $($Mob.Name)"; Level=$Mob.Level; XP=0; MaxHP=($Mob.MaxHP + $Player.PetBonusHP); HP=($Mob.MaxHP + $Player.PetBonusHP); Damage=$Mob.Damage; Armor=$Mob.Armor; IsLegacyPet = $false }
+                    $TickMsgs += "COIN FLIP WON: The Zombie Rot consumes the corpse... The $($Mob.Name) rises as your infected servant!"
+                } else {
+                    $TickMsgs += "COIN FLIP FAILED: The $($Mob.Name)'s corpse rots into useless sludge."
                 }
             }
-            
-            if ($null -ne $Player.ActivePet -and $Player.ActivePet.Level -lt 100) {
-                $Player.ActivePet.XP += $Mob.XP
+        }
+        
+        if ($null -ne $Player.ActivePet -and $Player.ActivePet.Level -lt 100) {
+            $Player.ActivePet.XP += $Mob.XP
+            $pLvl = $Player.ActivePet.Level; $NextXP = 10000
+            if ($pLvl -ge 99) { $NextXP = 1000000 } elseif ($pLvl -ge 61) { $NextXP = 250000 } elseif ($pLvl -ge 51) { $NextXP = 100000 } elseif ($pLvl -ge 41) { $NextXP = 50000 } elseif ($pLvl -ge 36) { $NextXP = 25000 } elseif ($pLvl -ge 31) { $NextXP = 17500 } elseif ($pLvl -ge 21) { $NextXP = 15000 } elseif ($pLvl -ge 11) { $NextXP = 12500 }
+
+            while ($Player.ActivePet.XP -ge $NextXP -and $Player.ActivePet.Level -lt 100) {
+                $Player.ActivePet.Level += 1; $Player.ActivePet.XP -= $NextXP
+                $Player.ActivePet.MaxHP += 15; $Player.ActivePet.HP = $Player.ActivePet.MaxHP
+                $Player.ActivePet.Damage += 3; $Player.ActivePet.Armor += 1
+                $TickMsgs += "YOUR PET LEVELED UP! The $($Player.ActivePet.Name) is now Level $($Player.ActivePet.Level)!"
                 $pLvl = $Player.ActivePet.Level; $NextXP = 10000
                 if ($pLvl -ge 99) { $NextXP = 1000000 } elseif ($pLvl -ge 61) { $NextXP = 250000 } elseif ($pLvl -ge 51) { $NextXP = 100000 } elseif ($pLvl -ge 41) { $NextXP = 50000 } elseif ($pLvl -ge 36) { $NextXP = 25000 } elseif ($pLvl -ge 31) { $NextXP = 17500 } elseif ($pLvl -ge 21) { $NextXP = 15000 } elseif ($pLvl -ge 11) { $NextXP = 12500 }
+            }
+        }
 
-                while ($Player.ActivePet.XP -ge $NextXP -and $Player.ActivePet.Level -lt 100) {
-                    $Player.ActivePet.Level += 1; $Player.ActivePet.XP -= $NextXP
-                    $Player.ActivePet.MaxHP += 15; $Player.ActivePet.HP = $Player.ActivePet.MaxHP
-                    $Player.ActivePet.Damage += 3; $Player.ActivePet.Armor += 1
-                    $TickMsgs += "YOUR PET LEVELED UP! The $($Player.ActivePet.Name) is now Level $($Player.ActivePet.Level)!"
-                    $pLvl = $Player.ActivePet.Level; $NextXP = 10000
-                    if ($pLvl -ge 99) { $NextXP = 1000000 } elseif ($pLvl -ge 61) { $NextXP = 250000 } elseif ($pLvl -ge 51) { $NextXP = 100000 } elseif ($pLvl -ge 41) { $NextXP = 50000 } elseif ($pLvl -ge 36) { $NextXP = 25000 } elseif ($pLvl -ge 31) { $NextXP = 17500 } elseif ($pLvl -ge 21) { $NextXP = 15000 } elseif ($pLvl -ge 11) { $NextXP = 12500 }
+        if ($null -ne $Mob.LootTable -and $Mob.LootTable.Count -gt 0) {
+            foreach ($Item in $Mob.LootTable) {
+                $ItemData = Get-ItemStats -ItemName $Item
+                $IsUnique = ($null -ne $ItemData -and $ItemData.Type -eq "Trinket")
+                $AlreadyOwned = $false
+                if ($IsUnique) {
+                    $AllOwned = @($Player.Inventory) + @($Player.EquippedTrinket)
+                    if ($null -ne $LegacyBonuses -and $null -ne $LegacyBonuses.Stash) { $AllOwned += @($LegacyBonuses.Stash) }
+                    foreach ($Owned in $AllOwned) { if ($Owned -ieq $Item) { $AlreadyOwned = $true; break } }
+                }
+                if (-not $AlreadyOwned) {
+                    $Player.Inventory += $Item; $TickMsgs += "[LOOT] You picked up: $Item"
+                } else {
+                    $TickMsgs += "[LOOT] You see a [$Item], but since it's a unique artifact you already possess, you leave it behind."
                 }
             }
+        }
 
-            if ($null -ne $Mob.LootTable -and $Mob.LootTable.Count -gt 0) {
-                foreach ($Item in $Mob.LootTable) {
-                    $ItemData = Get-ItemStats -ItemName $Item
-                    $IsUnique = ($null -ne $ItemData -and $ItemData.Type -eq "Trinket")
-                    $AlreadyOwned = $false
-                    if ($IsUnique) {
-                        $AllOwned = @($Player.Inventory) + @($Player.EquippedTrinket)
-                        if ($null -ne $LegacyBonuses -and $null -ne $LegacyBonuses.Stash) { $AllOwned += @($LegacyBonuses.Stash) }
-                        foreach ($Owned in $AllOwned) { if ($Owned -ieq $Item) { $AlreadyOwned = $true; break } }
-                    }
-                    if (-not $AlreadyOwned) {
-                        $Player.Inventory += $Item; $TickMsgs += "[LOOT] You picked up: $Item"
-                    } else {
-                        $TickMsgs += "[LOOT] You see a [$Item], but since it's a unique artifact you already possess, you leave it behind."
-                    }
+        while ($Player.XP -ge $Player.NextLevelXP) {
+            $Player.Level += 1; $Player.MaxHP += 15; $Player.HP = $Player.MaxHP; $Player.MaxSP += 1; $Player.SP = $Player.MaxSP; 
+            $Player.BaseStrength += 2; $Player.Strength = $Player.BaseStrength
+            $Player.BaseDexterity += 2; $Player.Dexterity = $Player.BaseDexterity
+            $Player.BaseCON += 1; $Player.CON = $Player.BaseCON
+            $Player.BaseCHA += 1; $Player.CHA = $Player.BaseCHA
+            $Player.BaseTactics += 1; $Player.Tactics = $Player.BaseTactics
+            $Player.BaseInt += 1; $Player.Int = $Player.BaseInt
+            $Player.BaseLuck += 1; $Player.Luck = $Player.BaseLuck
+            if ($Player.Class -ne "Immune Human") { $Player.BaseInfectivity += 1; $Player.Infectivity = $Player.BaseInfectivity }
+            $Player.NextLevelXP = [math]::Round($Player.NextLevelXP * 1.5)
+            $TickMsgs += "LEVEL UP! You are now Level $($Player.Level)! Your stats have increased, and your HP and SP are fully restored."
+            
+            $NewClassSkills = Get-ClassSkills -ClassName $Player.Class -PlayerLevel $Player.Level
+            foreach ($sk in $NewClassSkills) { if ($Player.LearnedSkills -notcontains $sk) { $Player.LearnedSkills += $sk } }
+            
+            if ($Player.LearnedSkills -contains "Stealth" -and -not $Player.IsStealthed) { $Player.IsStealthed = $true; $TickMsgs += "🌑 STEALTH UNLOCKED: You naturally fade into the shadows." }
+            if ($Player.Class -eq "Immune Human" -and $Player.Level -eq 20 -and $Player.Inventory -notcontains "Shotgun" -and $Player.EquippedWeapon -ne "Shotgun") { 
+                $Player.Inventory += "Shotgun"; $TickMsgs += "💥 LEVEL 20: You salvaged a heavy Shotgun for your arsenal!" 
+            }
+        }
+
+        if ($null -ne $Mob.IsPlayerCorpse -and $Mob.IsPlayerCorpse) { 
+            if ($null -ne $Player.ActivePet -and $Player.ActivePet.Name -match [regex]::Escape($Mob.Name)) {
+                $TickMsgs += "🏆 *** ACHIEVEMENT UNLOCKED: Ouroboros ***`n> You have consumed your past life! Its soul now serves you."
+                if (-not $LegacyBonuses.HasOuroboros) {
+                    $LegacyBonuses.HasOuroboros = $true; $TickMsgs += "🐍 OUROBOROS LEGACY UNLOCKED: All future lives gain +5 to ALL base stats!"
+                    $Player.BaseStrength += 5; $Player.Strength += 5; $Player.BaseDexterity += 5; $Player.Dexterity += 5
+                    $Player.BaseCON += 5; $Player.CON += 5; $Player.BaseCHA += 5; $Player.CHA += 5
+                    $Player.BaseTactics += 5; $Player.Tactics += 5; $Player.BaseInt += 5; $Player.Int += 5; $Player.BaseLuck += 5; $Player.Luck += 5
                 }
             }
-
-            while ($Player.XP -ge $Player.NextLevelXP) {
-                $Player.Level += 1; $Player.MaxHP += 15; $Player.HP = $Player.MaxHP; $Player.MaxSP += 1; $Player.SP = $Player.MaxSP; 
-                $Player.BaseStrength += 2; $Player.Strength = $Player.BaseStrength
-                $Player.BaseDexterity += 2; $Player.Dexterity = $Player.BaseDexterity
-                $Player.BaseCON += 1; $Player.CON = $Player.BaseCON
-                $Player.BaseCHA += 1; $Player.CHA = $Player.BaseCHA
-                $Player.BaseTactics += 1; $Player.Tactics = $Player.BaseTactics
-                $Player.BaseInt += 1; $Player.Int = $Player.BaseInt
-                $Player.BaseLuck += 1; $Player.Luck = $Player.BaseLuck
-                if ($Player.Class -ne "Immune Human") { $Player.BaseInfectivity += 1; $Player.Infectivity = $Player.BaseInfectivity }
-                $Player.NextLevelXP = [math]::Round($Player.NextLevelXP * 1.5)
-                $TickMsgs += "LEVEL UP! You are now Level $($Player.Level)! Your stats have increased, and your HP and SP are fully restored."
-                
-                $NewClassSkills = Get-ClassSkills -ClassName $Player.Class -PlayerLevel $Player.Level
-                foreach ($sk in $NewClassSkills) { if ($Player.LearnedSkills -notcontains $sk) { $Player.LearnedSkills += $sk } }
-                
-                if ($Player.LearnedSkills -contains "Stealth" -and -not $Player.IsStealthed) { $Player.IsStealthed = $true; $TickMsgs += "🌑 STEALTH UNLOCKED: You naturally fade into the shadows." }
-                if ($Player.Class -eq "Immune Human" -and $Player.Level -eq 20 -and $Player.Inventory -notcontains "Shotgun" -and $Player.EquippedWeapon -ne "Shotgun") { 
-                    $Player.Inventory += "Shotgun"; $TickMsgs += "💥 LEVEL 20: You salvaged a heavy Shotgun for your arsenal!" 
-                }
-            }
-
-            if ($null -ne $Mob.IsPlayerCorpse -and $Mob.IsPlayerCorpse) { 
-                if ($null -ne $Player.ActivePet -and $Player.ActivePet.Name -match [regex]::Escape($Mob.Name)) {
-                    $TickMsgs += "🏆 *** ACHIEVEMENT UNLOCKED: Ouroboros ***`n> You have consumed your past life! Its soul now serves you."
-                    if (-not $LegacyBonuses.HasOuroboros) {
-                        $LegacyBonuses.HasOuroboros = $true; $TickMsgs += "🐍 OUROBOROS LEGACY UNLOCKED: All future lives gain +5 to ALL base stats!"
-                        $Player.BaseStrength += 5; $Player.Strength += 5; $Player.BaseDexterity += 5; $Player.Dexterity += 5
-                        $Player.BaseCON += 5; $Player.CON += 5; $Player.BaseCHA += 5; $Player.CHA += 5
-                        $Player.BaseTactics += 5; $Player.Tactics += 5; $Player.BaseInt += 5; $Player.Int += 5; $Player.BaseLuck += 5; $Player.Luck += 5
-                    }
-                }
-                $LegacyBonuses.PlayerCorpse = $null 
-            }
+            $LegacyBonuses.PlayerCorpse = $null 
         }
     }
 
