@@ -574,6 +574,9 @@ function Invoke-PlayerCommand {
             }
             '^stash$' {
                 if ($RoomID -ne "1") { $OutMsg += "There is no storage box here. It is only accessible in the Awakening Cell." } else {
+                    # SAFETY INITIALIZER
+                    if ($null -eq $LegacyBonuses.Stash) { $LegacyBonuses.Stash = @() }
+                    
                     $MaxSlots = [math]::Floor($LegacyBonuses.MaxLevelReached / 10)
                     $StashDisplay = @("=== THE IRON STORAGE BOX ===", " Capacity: $($LegacyBonuses.Stash.Count) / $MaxSlots slots", "--------------------------------------------------")
                     if ($LegacyBonuses.Stash.Count -gt 0) {
