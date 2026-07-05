@@ -152,6 +152,8 @@ while ($GameIsRunning) {
     if ($Player.HP -le 0) {
         Write-Host "`nYOU HAVE DIED." -ForegroundColor Red -BackgroundColor Black
         
+        Sync-LegacyCurrencies -Player $Player -LegacyBonuses $LegacyBonuses
+        
         $CorpseInventory = @($Player.Inventory)
         $EquipSlots = @("EquippedWeapon", "EquippedOffhand", "EquippedArmor", "EquippedShoulders", "EquippedBoots", "EquippedTrinket", "EquippedNecklace")
         foreach ($Slot in $EquipSlots) { if ($Player.$Slot -ne "None" -and $Player.$Slot -ne "Fists" -and $null -ne $Player.$Slot) { $CorpseInventory += $Player.$Slot } }

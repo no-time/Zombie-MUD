@@ -46,9 +46,17 @@ function Out-MudScreen {
     Write-Host $StatLine -ForegroundColor Yellow -NoNewline
     Write-Host " | Status: " -ForegroundColor Yellow -NoNewline
 
-    if ($null -eq $PlayerState.ActiveEffects -or $PlayerState.ActiveEffects.Count -eq 0) {
-        Write-Host "Normal" -ForegroundColor DarkGray
-    } else {
+    $HasStatus = $false
+
+    # Check Stealth First
+    if ($PlayerState.IsStealthed) {
+        Write-Host "[Stealthed] " -ForegroundColor DarkGray -NoNewline
+        $HasStatus = $true
+    }
+
+    # Check Buffs/Debuffs
+    if ($null -ne $PlayerState.ActiveEffects -and $PlayerState.ActiveEffects.Count -gt 0) {
+        $HasStatus = $true
         for ($i = 0; $i -lt $PlayerState.ActiveEffects.Count; $i++) {
             $Eff = $PlayerState.ActiveEffects[$i]
             $Color = "Cyan" 
@@ -61,9 +69,14 @@ function Out-MudScreen {
             Write-Host "[$($Eff.Name)]" -ForegroundColor $Color -NoNewline
             if ($i -lt ($PlayerState.ActiveEffects.Count - 1)) { Write-Host " " -NoNewline }
         }
-        Write-Host "" # Drops down to the next line when finished
     }
     
+    # If neither exist, print Normal
+    if (-not $HasStatus) {
+        Write-Host "Normal" -ForegroundColor DarkGray -NoNewline
+    }
+
+    Write-Host "" # Drops down to the next line when finished
     Write-Host "--------------------------------------------------" -ForegroundColor DarkCyan
 
     # 3. Render Enemy Stats (IF IN COMBAT)
@@ -87,8 +100,8 @@ function Out-MudScreen {
                 Write-Host "[$($Eff.Name)]" -ForegroundColor $Color -NoNewline
                 if ($i -lt ($MobState.ActiveEffects.Count - 1)) { Write-Host " " -NoNewline }
             }
-            Write-Host "" # Drops down to the next line when finished
         }
+        Write-Host "" # Drops down to the next line when finished
         
         Write-Host "--------------------------------------------------" -ForegroundColor DarkRed
     }

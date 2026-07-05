@@ -21,7 +21,7 @@
   "Vicious Kick": { "Class": "Bruiser", "Cost": "12 SP", "Price": 800, "MinLevel": 10, "Description": "A heavy kick. 50% chance to Stun, otherwise Slows the enemy." },
   "Boneguard": { "Class": "Tank", "Cost": "Passive", "Price": 800, "MinLevel": 10, "Description": "Permanent AC and damage reflection scaling with Character Level." },
   "Friends in Low Places": { "Class": "Popular", "Cost": "Passive", "Price": 800, "MinLevel": 10, "Description": "Chance after combat to be gifted items by a sewer rat." },
-  "Two Fisting": { "Class": "Stealthy", "Cost": "Passive", "Price": 800, "MinLevel": 10, "Description": "Allows equipping a second weapon via 'equip offhand [item]'." },
+  "Two Fisting": { "Class": "Stealthy", "Cost": "Passive", "Price": 5000, "MinLevel": 10, "Description": "Passive: Allows the equipping of a secondary weapon in the offhand slot." },
   "Foresight": { "Class": "Tactician", "Cost": "15 SP", "Price": 800, "MinLevel": 10, "Description": "Type 'use foresight' to scan the next room and optionally ambush the enemy." },
   "Quite Shocking": { "Class": "Technologist", "Cost": "Passive", "Price": 800, "MinLevel": 10, "Description": "Permanent aura dealing level-scaled damage. Casts free Overload every 10 ticks." },
   "Heads or Tails": { "Class": "Charmed", "Cost": "15 SP", "Price": 800, "MinLevel": 10, "Description": "51% chance to deal massive double damage, 49% chance to lose your turn." },

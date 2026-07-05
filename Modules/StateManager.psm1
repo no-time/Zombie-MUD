@@ -1,5 +1,13 @@
 ﻿# --- Modules\StateManager.psm1 ---
 
+function Sync-LegacyCurrencies {
+    param([object]$Player, [object]$LegacyBonuses)
+    $LegacyBonuses.Bonechips    = $Player.Bonechips
+    $LegacyBonuses.Gunpowder    = $Player.Gunpowder
+    $LegacyBonuses.EnergyOrbs   = $Player.EnergyOrbs
+    $LegacyBonuses.ToxicGarnets = $Player.ToxicGarnets
+}
+
 function Invoke-GameTick {
     param(
         $Player, 
@@ -193,7 +201,7 @@ function Invoke-GameTick {
         }
 
         while ($Player.XP -ge $Player.NextLevelXP) {
-            $Player.Level += 1; $Player.MaxHP += 15; $Player.HP = $Player.MaxHP; $Player.MaxSP += 1; $Player.SP = $Player.MaxSP; 
+            $Player.Level += 1; if ($Player.Level -gt $LegacyBonuses.MaxLevelReached) { $LegacyBonuses.MaxLevelReached = $Player.Level }; $Player.MaxHP += 15; $Player.HP = $Player.MaxHP; $Player.MaxSP += 1; $Player.SP = $Player.MaxSP; 
             $Player.BaseStrength += 2; $Player.Strength = $Player.BaseStrength
             $Player.BaseDexterity += 2; $Player.Dexterity = $Player.BaseDexterity
             $Player.BaseCON += 1; $Player.CON = $Player.BaseCON

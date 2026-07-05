@@ -342,6 +342,8 @@ function Invoke-SkillRound {
         $SkillName,
         $LegacyBonuses = $null
     )
+    # Cache the stealth state before any attacks break it
+    $WasStealthed = $Player.IsStealthed
 
     $HasSkill = $false; $RealSkillName = ""
     foreach ($S in $Player.LearnedSkills) { 
@@ -552,7 +554,8 @@ function Invoke-SkillRound {
         $DamageDealt = $Player.Damage + [math]::Floor($Player.Dexterity * 3)
         $BleedTurns = 4
         
-        if ($Player.LearnedSkills -contains "Stealth" -and $Message -match "You leap from the shadows") {
+        # Replace the fragile string match with your clean boolean
+        if ($Player.LearnedSkills -contains "Stealth" -and $WasStealthed) {
             $DamageDealt = $DamageDealt * 2
             $BleedTurns += [math]::Max(1, [math]::Floor($Player.Level * 0.1))
         }

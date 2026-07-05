@@ -452,6 +452,37 @@ function Invoke-PlayerCommand {
                 $SkillDisplay += "--------------------------------------------------`n Type 'use [skillname]' in combat to activate."
                 $OutMsg += $SkillDisplay -join "`n> "
             }
+            '^cheat levelup$' {
+                # Force the level up process
+                $Player.XP = $Player.NextLevelXP
+                
+                # We reuse the logic from StateManager by triggering a manual tick/check 
+                # or you can just invoke the leveling math directly here for a "clean" test:
+                $Player.Level += 1
+                if ($Player.Level -gt $LegacyBonuses.MaxLevelReached) { $LegacyBonuses.MaxLevelReached = $Player.Level }
+                
+                $Player.MaxHP += 15; $Player.HP = $Player.MaxHP
+                $Player.MaxSP += 1; $Player.SP = $Player.MaxSP
+                
+                # Stat scaling
+                $Player.BaseStrength += 2; $Player.Strength = $Player.BaseStrength
+                $Player.BaseDexterity += 2; $Player.Dexterity = $Player.BaseDexterity
+                $Player.BaseCON += 1; $Player.CON = $Player.BaseCON
+                $Player.BaseCHA += 1; $Player.CHA = $Player.BaseCHA
+                $Player.BaseTactics += 1; $Player.Tactics = $Player.BaseTactics
+                $Player.BaseInt += 1; $Player.Int = $Player.BaseInt
+                $Player.BaseLuck += 1; $Player.Luck = $Player.BaseLuck
+                
+                if ($Player.Class -ne "Immune Human") { $Player.BaseInfectivity += 1; $Player.Infectivity = $Player.BaseInfectivity }
+                
+                $Player.NextLevelXP = [math]::Round($Player.NextLevelXP * 1.5)
+                
+                # Skill Unlocks
+                $NewClassSkills = Get-ClassSkills -ClassName $Player.Class -PlayerLevel $Player.Level
+                foreach ($sk in $NewClassSkills) { if ($Player.LearnedSkills -notcontains $sk) { $Player.LearnedSkills += $sk } }
+                
+                $OutMsg += "DEBUG: Level Up triggered! You are now Level $($Player.Level). Stats and Skills updated."
+            }
             '^stats$' { $OutMsg += "COMBAT STATS | STR: $($Player.Strength) | DEX: $($Player.Dexterity) | AC: $($Player.Armor) | WPN: $($Player.EquippedWeapon) ($($Player.Damage) DMG)" }
             '^(inv|inventory|i)$' {
                 $InvDisplay = @("=== INVENTORY ===")
@@ -497,18 +528,38 @@ function Invoke-PlayerCommand {
                 $Sheet += "=================================================="
                 $OutMsg += $Sheet -join "`n> "
             }
-            '^equip offhand\s+(.+)' {
-                if ($Player.LearnedSkills -notcontains "Two Fisting") { $OutMsg += "You do not know the Two Fisting technique to equip an offhand weapon!" } else {
+            '^equip offhand\s+(.+)$' {
+                if ($Player.Class -ne "Stealthy") {
+                    $OutMsg += "Your class lacks the agility and coordination to dual-wield weapons."
+                } elseif ($Player.LearnedSkills -notcontains "Two Fisting") { 
+                    $OutMsg += "You do not know the Two Fisting technique! You must seek out a trainer." 
+                } else {
                     $TargetItem = $Matches[1].Trim()
-                    $RealItem = $Player.Inventory | Where-Object { $_ -ieq $TargetItem } | Select-Object -First 1
-                    if ($null -ne $RealItem) {
-                        $ItemData = Get-ItemStats -ItemName $RealItem
+                    $FoundMatch = $false
+                    foreach ($InvItem in $Player.Inventory) {
+                        if ($InvItem -match "(?i)^$([regex]::Escape($TargetItem))(.*)$") { $TargetItem = $InvItem; $FoundMatch = $true; break }
+                    }
+                    
+                    if (-not $FoundMatch) { 
+                        $OutMsg += "You don't have a '$TargetItem' in your inventory." 
+                    } else {
+                        $ItemData = Get-ItemStats -ItemName $TargetItem
                         if ($null -ne $ItemData -and $ItemData.Type -eq "Weapon") {
-                            if ($Player.EquippedOffhand -ne "None") { $Player.Inventory += $Player.EquippedOffhand }
-                            $InvList = [System.Collections.ArrayList]$Player.Inventory; $InvList.Remove($RealItem); $Player.Inventory = @($InvList)
-                            $Player.EquippedOffhand = $RealItem; $OutMsg += "You equipped the [$RealItem] in your offhand."; $PassTurn = $true
+                            if ($Player.EquippedOffhand -ne "None" -and $null -ne $Player.EquippedOffhand) { $Player.Inventory += $Player.EquippedOffhand }
+                            
+                            $Player.EquippedOffhand = $TargetItem 
+                            
+                            $Idx = [array]::IndexOf($Player.Inventory, $TargetItem)
+                            if ($Idx -ge 0) {
+                                $TempInv = [System.Collections.ArrayList]@($Player.Inventory)
+                                $TempInv.RemoveAt($Idx)
+                                $Player.Inventory = @($TempInv)
+                            }
+                            
+                            $OutMsg += "You grip the [$TargetItem] firmly in your offhand."
+                            $PassTurn = $true
                         } else { $OutMsg += "You can only equip weapons in your offhand." }
-                    } else { $OutMsg += "You don't have a '$TargetItem' in your inventory." }
+                    }
                 }
             }
             '^equip\s+(?!offhand)(.+)' {
